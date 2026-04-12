@@ -4,20 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kill My Assignments — Leaderboard</title>
-  <!--
-    leaderboard.html — Weekly score rankings (LOGIN REQUIRED)
-    ──────────────────────────────────────────────────────────────
-    Auth guard: redirects to login.html if not signed in.
-
-    HOW TO MAKE THIS LIVE (see Q6 answer for full details):
-      1. In Firestore, store each user's score under:
-           users/{uid} → { displayName, weeklyScore, totalSessions, totalHours }
-      2. Query: getDocs(query(collection(db, "users"), orderBy("weeklyScore","desc"), limit(10)))
-      3. Build the lb-rows dynamically from the results.
-      4. Highlight the row where doc.id === currentUser.uid with class "mine".
-      5. Reset weeklyScore to 0 every Monday via a Cloud Function scheduled trigger.
-    ──────────────────────────────────────────────────────────────
-  -->
+  
   <link rel="stylesheet" href="shared.css">
   <style>
     .lb-page {
