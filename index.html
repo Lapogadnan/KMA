@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kill My Assignments — Timer</title>
+  
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .timer-page {
+      min-height: calc(100vh - 47px);
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      background: #F0EDE4;
+      position: relative;
+    }
+
+    /* Full-page background gif */
+    .timer-bg-gif {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      z-index: 0; opacity: 0.59; pointer-events: none;
+    }
+
+    /* ── Main panel ── */
+    .timer-main {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px;
+    }
+
+    /* Phase label + score chip row */
+    .timer-meta { display: flex; 
+      align-items: center; 
+      gap: 14px; 
+      margin-bottom: 32px; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+    }
+
+    .timer-label { font-size: 12px; 
+      font-weight: 500; color:black; 
+      letter-spacing: 1.5px; 
+      text-transform: uppercase;
+     }
+
+    .score-chip  { 
+       font-size: 12px;
+       font-weight: 500; 
+       color: var(--sage-deep); 
+       background: var(--sage-light); 
+       padding: 4px 12px; 
+       border-radius: 99px; 
+       transition: background 0.3s; 
+      }
+
+    .score-chip.bonus-flash { 
+      background: var(--gold-light); 
+    }
+
+    /* Ring */
+    .timer-ring-wrap {
+       position: relative; 
+       margin-bottom: 36px; 
+      }
+
+    .timer-ring-svg { 
+      transition: none; 
+    } /* ring colour animates via stroke */
+
+    #timer-ring { 
+      transition: stroke 0.6s ease; 
+    }
+
+    .timer-display {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .timer-number {
+     font-family: "Playfair Display",serif;
+     font-size: 52px; 
+     font-weight: 400; 
+     color: var(--text-dark); 
+     letter-spacing: -2px; 
+     line-height: 1;
+     }
+
+    .timer-phase  { 
+      font-size: 11px; 
+      color: black; 
+      margin-top: 6px; 
+      letter-spacing: 0.5px; 
+    }
+
+    /* Controls */
+    .timer-controls { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center; 
+      margin-bottom: 32px;
+     }
+    .timer-btn {
+      width: 52px; 
+      height: 52px; 
+      border-radius: 50%;
+      border: 1.5px solid var(--stone-light); background: var(--white);
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; box-shadow: var(--shadow-sm);
+    }
+    .timer-btn:hover { 
+      border-color: var(--sage); 
+      background: var(--sage-light); 
+    }
+    .timer-btn-main {
+      width: 64px; 
+      height: 64px;
+      background: var(--sage-deep);
+      border: none; 
+      border-radius: 50%;
+      font-size: 22px; 
+      color: white;
+      box-shadow: 0 4px 14px rgba(53,79,55,0.28);
+    }
+    .timer-btn-main:hover { 
+      background: var(--moss); 
+    }
+
+    /* Guest banner */
+    .guest-banner {
+      margin-top: 24px; 
+      background: rgba(253,252,250,0.9);
+      border: 1.5px dashed var(--stone-light); 
+      border-radius: var(--r-md);
+      padding: 16px 20px; display: flex; 
+      align-items: center; 
+      gap: 14px;
+      max-width: 400px; 
+      backdrop-filter: blur(4px);
+    }
+    .guest-banner-icon { 
+      font-size: 22px; 
+      flex-shrink: 0; 
+    }
+    .guest-banner-text { 
+      font-size: 12.5px; 
+      color: var(--text-mid); 
+      line-height: 1.5; 
+    }
+    .guest-banner-text a { 
+      color: var(--sage-deep); 
+      font-weight: 500; 
+      text-decoration: none; 
+    }
+
+    /* ── Check-in popup ── */
+    .popup-overlay {
+      position: fixed; 
+      inset: 0;
+      background: rgba(30,26,22,0.55);
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      z-index: 200;
+      opacity: 0; 
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .popup-overlay.show { 
+      opacity: 1; 
+      pointer-events: all; 
+    }
+    .popup-box {
+      background: var(--white); 
+      border-radius: var(--r-lg);
+      padding: 40px 48px; 
+      text-align: center; 
+      max-width: 380px;
+      box-shadow: var(--shadow-lg);
+      animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes popIn { 
+      from{transform:scale(0.7);
+      opacity:0
+    } to{transform:scale(1);opacity:1} }
+
+    .popup-emoji { 
+      font-size: 40px;
+      margin-bottom: 16px; 
+    }
+    .popup-title { 
+      font-family: "Playfair Display",serif; 
+      font-size: 22px; 
+      margin-bottom: 8px; 
+      color: var(--text-dark); 
+    }
+    .popup-sub   { 
+      font-size: 13px; 
+      color: var(--text-light); 
+      margin-bottom: 24px; 
+      line-height: 1.6; 
+    
+    }
+    #checkin-countdown { 
+      font-weight: 700; color: var(--sage-deep); 
+      transition: color 0.3s; 
+    }
+    #checkin-countdown.urgent { 
+      color: #c0392b; 
+    }
+    .popup-btn {
+      padding: 14px 40px; 
+      background: var(--sage-deep); 
+      color: #fff;
+      border: none; 
+      border-radius: var(--r-sm); 
+      font-size: 14px; 
+      font-weight: 500;
+      cursor: pointer; 
+      font-family: "DM Sans",sans-serif;
+      transition: background 0.2s; box-shadow: 0 2px 8px rgba(53,79,55,0.2);
+    }
+    .popup-btn:hover { 
+      background: var(--moss); 
+    }
+
+    /* ── Sidebar ── */
+    .timer-sidebar {
+      position: relative; z-index: 1;
+      background: rgba(253,252,250,0.96);
+      border-left: 1px solid var(--stone-light);
+      padding: 28px 24px; overflow-y: auto;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Duration steppers */
+    .setting-row {
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      padding: 11px 0; 
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .setting-row:last-of-type { 
+      border-bottom: none;
+    }
+    .setting-label { 
+      font-size: 13px; 
+      color: var(--text-mid); 
+    }
+    .setting-value { 
+      font-size: 13px;
+      font-weight: 500; 
+      color: var(--sage-deep); 
+    }
+    .stepper { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .stepper-btn {
+      width: 24px; 
+      height: 24px; 
+      border-radius: 50%;
+      border: 1.5px solid var(--stone-light); 
+      background: var(--white);
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-size: 14px; 
+      font-weight: 500;
+      color: var(--text-mid);
+      line-height: 1; padding: 0;
+      transition: all 0.15s;
+    }
+    .stepper-btn:hover { 
+      border-color: var(--sage); 
+      background: var(--sage-light); 
+      color: var(--sage-deep); 
+    }
+    .stepper-val { 
+      font-size: 13px; 
+      font-weight: 500; color: var(--sage-deep);
+       min-width: 24px; text-align: center; 
+      }
+    .stepper-unit {
+      font-size: 11px; 
+      color: var(--text-light);
+     }
+
+    /* YouTube embed — responsive 16:9 */
+    .youtube-wrap {
+      position: relative; 
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden; 
+      border-radius: var(--r-md);
+      margin-top: 20px;
+    }
+    .youtube-wrap iframe {
+      position: absolute; 
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: 0;
+    }
+
+    /* Duel locked (hidden once logged in) */
+    .duel-locked {
+      margin-top: 18px; 
+      border: 1.5px dashed var(--stone-light);
+      border-radius: var(--r-md); padding: 16px; 
+      text-align: center;
+    }
+    .duel-locked-icon  { 
+      font-size: 22px; 
+      margin-bottom: 6px;
+     }
+    .duel-locked-title { 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: var(--text-dark); 
+      margin-bottom: 4px; 
+    }
+    .duel-locked-sub   { 
+      font-size: 12px; 
+      color: var(--text-light); 
+      margin-bottom: 12px; 
+      line-height: 1.5; 
+    }
+    .duel-locked-btn   { 
+      display: block; 
+      padding: 9px; 
+      background: var(--sage-deep); 
+      color: #fff; 
+      border-radius: var(--r-sm); 
+      font-size: 12px; 
+      font-weight: 500; 
+      text-decoration: none; 
+      transition: background 0.2s; 
+    }
+    .duel-locked-btn:hover { 
+      background: var(--moss); 
+    }
+
+    .timer-page { background: transparent; }
+      body { background: transparent; }
+
+    /* ── Duel active banner ── */
+    .duel-banner {
+      display: none; 
+      position: relative; 
+      z-index: 10;
+      background: linear-gradient(135deg, var(--sage-deep), var(--moss));
+      color: #fff; text-align: center; 
+      padding: 10px 20px;
+      font-size: 13px; 
+      font-weight: 500; 
+      font-family: "DM Sans", sans-serif;
+      letter-spacing: 0.2px;
+    }
+    .duel-banner.show { 
+      display: block; 
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background gif -->
+  <img class="timer-bg-gif"src="download.gif" alt="">
+
+  <!-- CHECK-IN POPUP -->
+  <div class="popup-overlay" id="checkin-popup">
+    <div class="popup-box">
+      <div class="popup-emoji">🌿</div>
+      <div class="popup-title">Still with us?</div>
+      <div class="popup-sub">
+        Confirm you're focused — or your session resets in
+        <span id="checkin-countdown">20</span> seconds.
+      </div>
+      <button class="popup-btn" id="checkin-btn">I'm still here ✓</button>
+    </div>
+  </div>
+
+  <!-- Duel request popup -->
+  <div class="popup-overlay" id="duel-request-popup">
+    <div class="popup-box">
+      <div class="popup-emoji">⚔️</div>
+      <div class="popup-title">Focus Duel!</div>
+      <div class="popup-sub">
+        <strong id="duel-challenger-name">Someone</strong> challenged you to a duel.<br>
+        First to quit or miss a check-in loses all session progress.<br>
+        Winner earns <strong>1.5× points</strong>.
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:20px;">
+        Auto-declines in <span id="duel-req-countdown" style="font-weight:600;color:var(--sage-deep)">5:00</span>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="popup-btn" id="duel-accept-btn" style="flex:1">Accept ⚔</button>
+        <button id="duel-decline-btn" style="flex:1;padding:14px;border:1.5px solid var(--stone-light);background:var(--white);border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duel active banner -->
+  <div class="duel-banner" id="duel-banner">
+    ⚔ DUEL IN PROGRESS vs <span id="duel-banner-name">Opponent</span> — quit or miss a check-in and you lose!
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- NAV  -->
+  <nav class="nav">
+    <div class="nav-left">
+      <a class="nav-logo" href="index.html">Kill My <span>Assignments</span></a>
+      <div class="nav-tabs">
+        <a class="nav-tab active" href="index.html">Timer</a>
+        <a class="nav-tab" href="leaderboard.html">Leaderboard</a>
+        <a class="nav-tab" href="map.html">Study map</a>
+        <a class="nav-tab" href="about-us.html">About</a>
+      </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+      <a href="login.html" class="nav-login-btn">Sign in</a>
+    </div>
+  </nav>
+
+  <!-- TIMER PAGE -->
+  <div class="timer-page">
+
+    <!-- ── Left: timer ── -->
+    <div class="timer-main">
+      <!-- Phase label and live score -->
+      <div class="timer-meta">
+        <div class="timer-label" id="session-label">Work session · Cycle 1</div>
+        <div class="score-chip" id="score-chip">0 pts</div>
+      </div>
+
+      <div class="timer-ring-wrap">
+        <!-- SVG Ring-->
+        <svg class="timer-ring-svg" width="220" height="220" viewBox="0 0 220 220">
+          <!-- Background track -->
+          <circle cx="110" cy="110" r="96" fill="none" stroke="#ddd8d0" stroke-width="10"/>
+          <!-- Progress ring -->
+          <circle id="timer-ring"
+            cx="110" cy="110" r="96"
+            fill="none" stroke="#354f37" stroke-width="10"
+            stroke-dasharray="603.2" stroke-dashoffset="0"
+            stroke-linecap="round"
+            transform="rotate(-90 110 110)"/>
+          <!-- Small decorative dot at top -->
+          <circle id="timer-ring-dot" cx="110" cy="14" r="4" fill="#354f37" opacity="0.5"/>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-number" id="timer-display">25:00</div>
+          <div class="timer-phase" id="timer-phase">Deep focus</div>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <button class="timer-btn" id="restart-btn" title="Restart session">⟳</button>
+        <button class="timer-btn timer-btn-main" id="play-btn">▶</button>
+        <button class="timer-btn" id="skip-btn" title="Skip to next phase">⏭</button>
+      </div>
+
+      <!-- Guest banner -->
+      <div class="guest-banner" id="guest-banner">
+        <div class="guest-banner-icon">🌱</div>
+        <div class="guest-banner-text">
+          Guest mode — timer works, scores aren't saved.
+          <a href="login.html">Sign in free</a> to track scores, duels &amp; streaks.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: settings sidebar -->
+    <div class="timer-sidebar">
+      <div class="panel-title">Timer settings</div>
+
+      <!-- Duration steppers -->
+      <div class="setting-row">
+        <div class="setting-label">Work session</div>
+        <div class="stepper">
+          <button class="stepper-btn" id="work-minus">−</button>
+          <span class="stepper-val" id="work-display">25</span>
+          <span class="stepper-unit">min</span>
+          <button class="stepper-btn" id="work-plus">+</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">Break</div>
+        <div class="stepper">
+          <button class="stepper-btn" id="break-minus">−</button>
+          <span class="stepper-val" id="break-display">5</span>
+          <span class="stepper-unit">min</span>
+          <button class="stepper-btn" id="break-plus">+</button>
+        </div>
+      </div>
+
+      <!-- Check-in toggle  -->
+      <div class="setting-row">
+        <div class="setting-label">Check-in prompts</div>
+        <button id="checkin-toggle" style="
+          background: var(--sage-deep); color: #fff;
+          border: none; border-radius: 99px;
+          padding: 3px 12px; font-size: 11px; font-weight: 500;
+          font-family: 'DM Sans',sans-serif; cursor: pointer;
+          transition: background 0.2s; letter-spacing: 0.3px;">On ●</button>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">Cycles completed</div>
+        <div class="setting-value" id="cycle-count-display">0</div>
+      </div>
+
+      <!--"Working on" field -->
+      <div style="padding:12px 0 14px;border-bottom:1px solid var(--cream-dark);">
+        <div class="setting-label" style="margin-bottom:7px;">Working on</div>
+        <input id="subject-input" class="field-input" type="text"
+          placeholder="e.g. Databases, COMP1602…"
+          style="margin-bottom:0;font-size:13px;padding:8px 12px;background:var(--cream);">
+      </div>
+
+      <!-- YouTube embed -->
+      <div class="youtube-wrap">
+        <iframe
+          src="https://www.youtube.com/embed/ANkxRGvl1VY?si=xZMAWKmSeIJsNM-i"
+          title="Lo-fi study music"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <!-- Duel card: shown to guests only (hidden once logged in) -->
+      <div class="duel-locked" id="duel-locked">
+        <div class="duel-locked-icon">⚔</div>
+        <div class="duel-locked-title">Focus Duels</div>
+        <div class="duel-locked-sub">Challenge friends and earn points together. Needs a free account.</div>
+        <a href="login.html" class="duel-locked-btn">Sign in to duel →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TIMER LOGIC + FIREBASE AUTH -->
+ 
+  <script type="module">
+    import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged }
+                                   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
+             addDoc, collection, increment, serverTimestamp,
+             onSnapshot, query, where }
+                                   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { firebaseConfig }      from "./firebase-config.js";
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+    let currentUser = null; // set once auth state resolves
+
+    // Auth: update nav and hide guest-only elements 
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      const navRight = document.getElementById("nav-right");
+
+      if (user) {
+        const name    = user.displayName || user.email.split("@")[0];
+        const initial = name.charAt(0).toUpperCase();
+        navRight.innerHTML = `
+          <a href="dashboard.html" class="nav-user-pill">
+            <div class="nav-user-dot">${initial}</div>
+            <span>${name.split(" ")[0]}</span>
+          </a>`;
+        document.getElementById("guest-banner").style.display = "none";
+        document.getElementById("duel-locked").style.display  = "none";
+        startDuelListeners(user.uid);
+      }
+      // else: default "Sign in" button and guest banner remain
+    });
+
+    //  CONSTANTS & STATE
+
+    const CIRC = 2 * Math.PI * 96; 
+    const WORK_COLOUR  = "#354f37"; 
+    const BREAK_COLOUR = "#7AABB8"; 
+
+    // User-adjustable durations 
+    let workMins  = 25;
+    let breakMins = 5;
+
+    // Timer state
+    let phase      = "work"; // "work" | "break"
+    let totalSecs  = workMins * 60;
+    let secs       = totalSecs;
+    let running    = false;
+
+    // Score tracking
+    let sessionScore  = 0;  // secured points (from completed cycles)
+    let pendingBonus  = 0;  // check-in bonuses for current cycle (lost on failure)
+    let cycleCount    = 0;  // completed work phases this session
+
+    // Check-in toggle state 
+    let checkinsEnabled = true;
+
+   
+    let locationSet = false;
+
+    // Duel state 
+    let activeDuelId       = null;   // Firestore doc ID of the active duel
+    let isDueling          = false;
+    let duelOpponentName   = null;
+    let duelWon            = false;  // set true when opponent loses
+    let duelReqCountdownId = null;   // interval for the 5-min accept countdown
+    let duelUnsubscribe    = null;   // cleanup for the active-duel onSnapshot
+
+    // Interval / timeout handles
+    let countdownInterval        = null;
+    let autoStartTimer           = null; // brief delay before auto-starting next phase
+    let checkinScheduleTimer     = null;
+    let checkinCountdownInterval = null;
+    let checkinSecondsLeft       = 20;
+    let checkinVisible           = false;
+
+  
+    //  DISPLAY HELPERS
+    function updateDisplay() {
+      const m = String(Math.floor(secs / 60)).padStart(2, "0");
+      const s = String(secs % 60).padStart(2, "0");
+      document.getElementById("timer-display").textContent = `${m}:${s}`;
+
+      const offset = CIRC * (1 - secs / totalSecs);
+      document.getElementById("timer-ring").setAttribute("stroke-dashoffset", offset.toFixed(1));
+    }
+
+
+    function updatePhaseUI() {
+      const isWork  = phase === "work";
+      const colour  = isWork ? WORK_COLOUR : BREAK_COLOUR;
+      const display = isWork
+        ? `Work session · Cycle ${cycleCount + 1}`
+        : `Break time · Cycle ${cycleCount}`;
+
+      document.getElementById("session-label").textContent = display;
+      document.getElementById("timer-phase").textContent   = isWork ? "Deep focus" : "Rest time";
+      document.getElementById("timer-ring").setAttribute("stroke", colour);
+      document.getElementById("timer-ring-dot").setAttribute("fill", colour);
+      document.getElementById("cycle-count-display").textContent = cycleCount;
+    }
+
+     
+    function updateScoreDisplay(flash = false) {
+      const chip = document.getElementById("score-chip");
+      chip.textContent = `${sessionScore + pendingBonus} pts`;
+      if (flash) {
+        chip.classList.add("bonus-flash");
+        setTimeout(() => chip.classList.remove("bonus-flash"), 600);
+      }
+    }
+
+    /**
+     * showToast(message, type)
+     * Briefly shows a bottom toast. type: "error" | "success"
+     */ 
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className   = `toast ${type} show`;
+      setTimeout(() => toast.classList.remove("show"), 3500);
+    }
+
+
+    //  DUEL SYSTEM
+    
+  
+    function startDuelListeners(uid) {
+      // Listen for duel requests sent TO me
+      onSnapshot(
+        query(collection(db, "duels"), where("toUid", "==", uid), where("status", "==", "pending")),
+        snap => {
+          snap.docChanges().forEach(change => {
+            if (change.type === "added") {
+              const d = change.doc.data();
+              if (d.expiresAt > Date.now()) showDuelRequest(change.doc.id, d);
+            }
+          });
+        }
+      );
+
+      // Listen for duels I'm in that just became active (challenger side)
+      onSnapshot(
+        query(collection(db, "duels"), where("fromUid", "==", uid), where("status", "==", "active")),
+        snap => {
+          snap.docChanges().forEach(change => {
+            if (change.type === "added" && !isDueling) {
+              const d = change.doc.data();
+              enterDuel(change.doc.id, d.toName);
+            }
+          });
+        }
+      );
+    }
+
+    /**
+     * showDuelRequest(duelId, data)
+     * Displays the incoming duel popup with a 5-min countdown.
+     */
+    function showDuelRequest(duelId, data) {
+      document.getElementById("duel-challenger-name").textContent = data.fromName || "Someone";
+      document.getElementById("duel-request-popup").classList.add("show");
+
+      // Countdown to auto-decline
+      let secsLeft = Math.max(0, Math.floor((data.expiresAt - Date.now()) / 1000));
+      const countdownEl = document.getElementById("duel-req-countdown");
+
+      function tick() {
+        const m = String(Math.floor(secsLeft / 60)).padStart(2, "0");
+        const s = String(secsLeft % 60).padStart(2, "0");
+        countdownEl.textContent = `${m}:${s}`;
+        if (secsLeft <= 0) {
+          clearInterval(duelReqCountdownId);
+          hideDuelRequest();
+        }
+        secsLeft--;
+      }
+      tick();
+      clearInterval(duelReqCountdownId);
+      duelReqCountdownId = setInterval(tick, 1000);
+
+      document.getElementById("duel-accept-btn").onclick  = () => acceptDuel(duelId, data.fromName);
+      document.getElementById("duel-decline-btn").onclick = () => {
+        updateDoc(doc(db, "duels", duelId), { status: "declined" }).catch(() => {});
+        hideDuelRequest();
+      };
+    }
+
+    function hideDuelRequest() {
+      clearInterval(duelReqCountdownId);
+      document.getElementById("duel-request-popup").classList.remove("show");
+    }
+
+    /**
+     * acceptDuel(duelId, opponentName)
+     * Marks duel as active and puts both users into duel mode.
+     */
+    async function acceptDuel(duelId, opponentName) {
+      try {
+        await updateDoc(doc(db, "duels", duelId), { status: "active" });
+        hideDuelRequest();
+        enterDuel(duelId, opponentName);
+      } catch (err) {
+        showToast("Failed to accept duel.", "error");
+        console.error(err);
+      }
+    }
+
+    /**
+     * enterDuel(duelId, opponentName)
+     * Sets local duel state and shows the active banner.
+     * Also subscribes to the duel doc to detect when the opponent loses.
+     */
+    function enterDuel(duelId, opponentName) {
+      activeDuelId     = duelId;
+      isDueling        = true;
+      duelOpponentName = opponentName;
+      duelWon          = false;
+
+      document.getElementById("duel-banner-name").textContent = opponentName;
+      document.getElementById("duel-banner").classList.add("show");
+      showToast(`⚔ Duel started vs ${opponentName}! Don't quit.`, "success");
+
+      // Watch for the duel completing so we can apply the winner's bonus
+      if (duelUnsubscribe) duelUnsubscribe();
+      duelUnsubscribe = onSnapshot(doc(db, "duels", duelId), snap => {
+        if (!snap.exists()) return;
+        const d = snap.data();
+        if (d.status === "completed" && d.loserUid && d.loserUid !== currentUser?.uid) {
+
+          duelWon = true;
+          clearDuelState();
+          showToast("⚔ You won the duel! 1.5× bonus on your next completed session.", "success");
+        } else if (d.status === "completed" && d.loserUid === currentUser?.uid) {
+         
+          clearDuelState();
+        } else if (d.status === "declined" || d.status === "cancelled") {
+          clearDuelState();
+        }
+      });
+    }
+
+    /**
+     * handleDuelLoss()
+     * Called when the current user restarts or misses a check-in while dueling.
+     * Marks them as the loser in Firestore, then calls loseProgress().
+     */
+    async function handleDuelLoss() {
+      if (!isDueling || !activeDuelId) return;
+      const duelRef = doc(db, "duels", activeDuelId);
+      clearDuelState();
+      try {
+        await updateDoc(duelRef, { status: "completed", loserUid: currentUser.uid });
+      } catch (err) { console.error("Duel loss write failed:", err); }
+    }
+
+    /**
+     * clearDuelState()
+     * Resets all duel variables and hides the banner.
+     */
+    function clearDuelState() {
+      isDueling      = false;
+      activeDuelId   = null;
+      duelOpponentName = null;
+      if (duelUnsubscribe) { duelUnsubscribe(); duelUnsubscribe = null; }
+      document.getElementById("duel-banner").classList.remove("show");
+    }
+
+    /**
+     * updatePresence(data)
+     * Single point of truth for all timer state → Firestore presence writes.
+     * The map, dashboard friends panel, and "studying count" all read from here.
+     */
+    function updatePresence(data) {
+      if (!currentUser) return;
+      setDoc(doc(db, "activeSessions", currentUser.uid),
+        { ...data, lastUpdated: serverTimestamp() },
+        { merge: true }
+      ).catch(() => {});
+    }
+
+    //  CHECK-IN SYSTEM  (work phases only)
+   
+
+    
+    // Schedules the next check-in popup.
+     
+    function scheduleCheckin() {
+      clearTimeout(checkinScheduleTimer);
+      if (!checkinsEnabled) return; // toggle is off 
+
+      const sessionMs = workMins * 60 * 1000;
+      const minDelay  = Math.max(30_000,   sessionMs * 0.20); // 20% or 30 s
+      const maxDelay  = Math.min(900_000,  sessionMs * 0.50); // 50% or 15 min
+      // Ensure min < max (edge case: very short sessions where 50% < 30 s)
+      const delay = minDelay + Math.random() * Math.max(0, maxDelay - minDelay);
+
+      checkinScheduleTimer = setTimeout(() => {
+        if (running && phase === "work") showCheckin();
+      }, delay);
+    }
+
+    /**
+     * showCheckin()
+     * Displays the popup and starts the 20-second countdown.
+     */
+    function showCheckin() {
+      checkinVisible     = true;
+      checkinSecondsLeft = 20;
+      const countdownEl  = document.getElementById("checkin-countdown");
+      countdownEl.textContent = checkinSecondsLeft;
+      countdownEl.classList.remove("urgent");
+      document.getElementById("checkin-popup").classList.add("show");
+
+      checkinCountdownInterval = setInterval(() => {
+        checkinSecondsLeft--;
+        countdownEl.textContent = checkinSecondsLeft;
+        if (checkinSecondsLeft <= 8) countdownEl.classList.add("urgent");
+        if (checkinSecondsLeft <= 0) {
+          clearInterval(checkinCountdownInterval);
+          loseProgress();
+        }
+      }, 1000);
+    }
+
+    /**
+     * dismissCheckin()
+     * Called when user clicks "I'm still here".
+     * Awards a scaled bonus and schedules the next check-in.
+     *
+     * SCALED BONUS — 40% of the per-minute point rate :
+     *   5 min  → +2 pts per check-in
+     *   25 min → +10 pts per check-in
+     *   60 min → +24 pts per check-in
+     */
+    function dismissCheckin() {
+      checkinVisible = false;
+      clearInterval(checkinCountdownInterval);
+      document.getElementById("checkin-popup").classList.remove("show");
+
+      const bonus = Math.max(1, Math.round(workMins * 0.4));
+      pendingBonus += bonus;
+      updateScoreDisplay(true); // flash chip gold to show bonus
+
+      if (running) scheduleCheckin(); // schedule next check-in
+    }
+
+    /**
+     * cancelCheckin()
+     * Clears all check-in timers without penalty.
+     * Called on pause, skip, restart, and phase transitions.
+     */
+    function cancelCheckin() {
+      clearTimeout(checkinScheduleTimer);
+      clearInterval(checkinCountdownInterval);
+      checkinVisible = false;
+      document.getElementById("checkin-popup").classList.remove("show");
+    }
+
+    /**
+     * Triggered when the 20-second dismiss window expires.
+     * Resets the current work phase. pendingBonus is forfeited.
+     * Completed previous cycles' scores are kept in sessionScore.
+     */
+    function loseProgress() {
+      clearInterval(countdownInterval);
+      clearTimeout(autoStartTimer);
+      cancelCheckin();
+
+      running      = false;
+      phase        = "work";
+      secs         = workMins * 60;
+      totalSecs    = workMins * 60;
+      pendingBonus = 0; // forfeited for this cycle
+
+      document.getElementById("play-btn").textContent = "▶";
+      updateDisplay();
+      updatePhaseUI();
+      updateScoreDisplay();
+      showToast("Session reset — you missed the check-in.", "error");
+
+      if (isDueling) handleDuelLoss();
+    }
+
+  
+    // COUNTDOWN 
+   
+
+    function startCountdown() {
+      countdownInterval = setInterval(() => {
+        secs--;
+        if (secs <= 0) {
+          secs = 0;
+          clearInterval(countdownInterval);
+          updateDisplay();
+          phase === "work" ? onWorkComplete() : onBreakComplete();
+        } else {
+          updateDisplay();
+        }
+      }, 1000);
+    }
+
+    /**
+     * onWorkComplete()
+     * Fires when a work phase counts down to zero.
+     * Awards score, switches to break, then auto-starts break after 1.5s.
+     * Writes to Firestore: user summary doc + session sub-collection.
+     */
+    async function onWorkComplete() {
+      cancelCheckin();
+      running = false;
+
+      // SCALED SCORE — 4 pts per minute so longer sessions earn proportionally more.
+      //   5 min  →  20 pts base
+      //   25 min → 100 pts base  
+      //   60 min → 240 pts base
+      //   90 min → 360 pts base
+      const base    = Math.round(workMins * 4);
+      const rawEarned = base + pendingBonus;
+      const earned  = duelWon ? Math.round(rawEarned * 1.5) : rawEarned;
+      if (duelWon) { duelWon = false; showToast(`⚔ Duel bonus applied! ${rawEarned} → ${earned} pts`, "success"); }
+      sessionScore += earned;
+      cycleCount++;
+      pendingBonus = 0;
+
+      updateScoreDisplay(true);
+      document.getElementById("play-btn").textContent = "▶";
+
+      showToast(`Work done! +${earned} pts — break starting 🌿`, "success");
+
+      // Switch to break phase
+      phase     = "break";
+      secs      = breakMins * 60;
+      totalSecs = breakMins * 60;
+      updatePhaseUI();
+      updateDisplay();
+      updatePresence({ running: false, phase: "break" }); // transitioning 
+
+      // Auto-start break after brief toast window
+      autoStartTimer = setTimeout(() => {
+        if (!running) { // user may have pressed restart in the gap
+          running = true;
+          document.getElementById("play-btn").textContent = "⏸";
+          startCountdown();
+          updatePresence({ running: true, phase: "break" }); 
+        }
+      }, 1500);
+
+      // Write to Firestore (logged-in users only) 
+      if (!currentUser) return;
+
+      const subject = document.getElementById("subject-input").value.trim() || "General";
+      const userRef = doc(db, "users", currentUser.uid);
+
+      try {
+        // Streak calculation 
+        // Read the user doc first to compare lastSessionDate with today.
+        const snap     = await getDoc(userRef);
+        const existing = snap.exists() ? snap.data() : {};
+        let streak     = existing.streak || 0;
+        const lastDate = existing.lastSessionDate?.toDate?.();
+        const today    = new Date(); today.setHours(0, 0, 0, 0);
+
+        if (lastDate) {
+          const last = new Date(lastDate); last.setHours(0, 0, 0, 0);
+          const diffDays = Math.round((today - last) / 86400000);
+          if (diffDays === 0)      { /* same day — keep streak */   }
+          else if (diffDays === 1) { streak++;  /* consecutive day */ }
+          else                     { streak = 1; /* gap — reset */    }
+        } else {
+          streak = 1; // very first session
+        }
+
+        // Update user summary doc
+       
+        await updateDoc(userRef, {
+          weeklyScore:             increment(earned),
+          allTimeScore:            increment(earned),
+          totalSessions:           increment(1),
+          totalHours:              increment(workMins / 60),
+          streak,
+          lastSessionDate:         serverTimestamp(),
+      
+          [`subjects.${subject}`]: increment(workMins),
+          displayName: currentUser.displayName || currentUser.email.split("@")[0],
+        });
+
+        // Write session record to sub-collection 
+        await addDoc(collection(db, "users", currentUser.uid, "sessions"), {
+          subject,
+          durationMins: workMins,
+          score:        earned,
+          completedAt:  serverTimestamp(),
+        });
+
+        // Presence is already updated by updatePresence() calls above.
+
+      } catch (err) {
+        if (err.code === "not-found") {
+          // New user — their users/{uid} doc doesn't exist yet. Create it.
+          await setDoc(userRef, {
+            displayName:  currentUser.displayName || currentUser.email.split("@")[0],
+            weeklyScore:  earned,
+            allTimeScore: earned,
+            totalSessions: 1,
+            totalHours:   workMins / 60,
+            streak:       1,
+            lastSessionDate: serverTimestamp(),
+            subjects:     { [subject]: workMins },
+          });
+          // Still write the session record
+          await addDoc(collection(db, "users", currentUser.uid, "sessions"), {
+            subject, durationMins: workMins, score: earned, completedAt: serverTimestamp(),
+          });
+        } else {
+          console.warn("Firestore write failed:", err);
+        }
+      }
+    }
+
+    /**
+     * onBreakComplete()
+     * Fires when a break phase counts down to zero.
+     * Switches back to a work phase and auto-starts after 1.5s.
+     */
+    function onBreakComplete() {
+      running = false;
+      document.getElementById("play-btn").textContent = "▶";
+      showToast("Break over — back to work!", "success");
+
+      phase     = "work";
+      secs      = workMins * 60;
+      totalSecs = workMins * 60;
+      updatePhaseUI();
+      updateDisplay();
+      updatePresence({ running: false, phase: "work" }); // transitioning — work pending
+
+      autoStartTimer = setTimeout(() => {
+        if (!running) {
+          running = true;
+          document.getElementById("play-btn").textContent = "⏸";
+          startCountdown();
+          scheduleCheckin();
+          const subject = document.getElementById("subject-input").value.trim() || "General";
+          updatePresence({ running: true, phase: "work", subject }); // work is now live
+        }
+      }, 1500);
+    }
+
+    //  TIMER CONTROLS
+   
+  
+    function toggleTimer() {
+      if (running) {
+        // ── PAUSE ──
+        running = false;
+        clearInterval(countdownInterval);
+        clearTimeout(autoStartTimer);
+        cancelCheckin();
+        document.getElementById("play-btn").textContent = "▶";
+        // Keep doc alive — just mark as not running so map shows "Paused"
+        updatePresence({ running: false });
+
+      } else {
+        // ── START / RESUME ──
+        running = true;
+        document.getElementById("play-btn").textContent = "⏸";
+        startCountdown();
+        if (phase === "work") scheduleCheckin();
+
+        if (currentUser) {
+          const subject     = document.getElementById("subject-input").value.trim() || "General";
+          const displayName = currentUser.displayName || currentUser.email.split("@")[0];
+
+          if (!locationSet) {
+            // First play: request geolocation and write lat/lng 
+            // The browser prompt fires once; subsequent resumes skip this block.
+            locationSet = true;
+            const writeWithLoc = (lat, lng) => updatePresence({
+              displayName, subject, phase, running: true,
+              lat, lng, startedAt: serverTimestamp(),
+            });
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                p  => writeWithLoc(p.coords.latitude, p.coords.longitude),
+                () => writeWithLoc(10.6412, -61.4013) // fallback: UWI St Augustine
+              );
+            } else {
+              writeWithLoc(10.6412, -61.4013);
+            }
+          } else {
+            // Resume: update state, preserve stored lat/lng 
+            updatePresence({ displayName, subject, phase, running: true });
+          }
+        }
+      }
+    }
+
+    //Restart Timer 
+  
+    function restartTimer() {
+      clearInterval(countdownInterval);
+      clearTimeout(autoStartTimer);
+      cancelCheckin();
+
+      running       = false;
+      phase         = "work";
+      secs          = workMins * 60;
+      totalSecs     = workMins * 60;
+      sessionScore  = 0;
+      pendingBonus  = 0;
+      cycleCount    = 0;
+
+      document.getElementById("play-btn").textContent = "▶";
+      updateDisplay();
+      updatePhaseUI();
+      updateScoreDisplay();
+
+      // Remove from live map / presence
+      if (currentUser) {
+        deleteDoc(doc(db, "activeSessions", currentUser.uid)).catch(() => {});
+      }
+
+      if (isDueling) handleDuelLoss();
+    }
+
+  
+    function skipPhase() {
+      clearInterval(countdownInterval);
+      clearTimeout(autoStartTimer);
+      cancelCheckin();
+      running = false;
+
+      if (phase === "work") {
+        // Skip work → move to break (no points)
+        pendingBonus = 0;
+        phase     = "break";
+        secs      = breakMins * 60;
+        totalSecs = breakMins * 60;
+      } else {
+        // Skip break → move to work
+        phase     = "work";
+        secs      = workMins * 60;
+        totalSecs = workMins * 60;
+      }
+
+      document.getElementById("play-btn").textContent = "▶";
+      updateDisplay();
+      updatePhaseUI();
+    }
+
+   
+    //  DURATION SETTINGS
+
+    
+    function setWorkMins(val) {
+      workMins = Math.max(5, Math.min(90, val));
+      document.getElementById("work-display").textContent = workMins;
+      if (!running && phase === "work") {
+        secs = workMins * 60; totalSecs = workMins * 60; updateDisplay();
+      }
+    }
+
+    function setBreakMins(val) {
+      breakMins = Math.max(1, Math.min(30, val));
+      document.getElementById("break-display").textContent = breakMins;
+      if (!running && phase === "break") {
+        secs = breakMins * 60; totalSecs = breakMins * 60; updateDisplay();
+      }
+    }
+
+    document.getElementById("work-minus").addEventListener("click",  () => setWorkMins(workMins - 5));
+    document.getElementById("work-plus").addEventListener("click",   () => setWorkMins(workMins + 5));
+    document.getElementById("break-minus").addEventListener("click", () => setBreakMins(breakMins - 1));
+    document.getElementById("break-plus").addEventListener("click",  () => setBreakMins(breakMins + 1));
+
+    
+    //Check-in toggle button
+    
+    document.getElementById("checkin-toggle").addEventListener("click", () => {
+      checkinsEnabled = !checkinsEnabled;
+      const btn = document.getElementById("checkin-toggle");
+      if (checkinsEnabled) {
+        btn.textContent                = "On ●";
+        btn.style.background           = "var(--sage-deep)";
+        // If timer is mid-session, schedule now so the user gets check-ins
+        if (running && phase === "work") scheduleCheckin();
+      } else {
+        btn.textContent                = "Off ○";
+        btn.style.background           = "var(--stone)";
+        // Cancel any pending check-in 
+        cancelCheckin();
+      }
+    });
+
+    
+    //  BUTTON WIRING
+    
+
+    document.getElementById("play-btn").addEventListener("click",    toggleTimer);
+    document.getElementById("restart-btn").addEventListener("click", restartTimer);
+    document.getElementById("skip-btn").addEventListener("click",    skipPhase);
+    document.getElementById("checkin-btn").addEventListener("click", dismissCheckin);
+
+   
+    //  SESSION CLEANUP ON PAGE EXIT
+  
+
+    function cleanupSession() {
+      if (currentUser) {
+       
+        deleteDoc(doc(db, "activeSessions", currentUser.uid)).catch(() => {});
+      }
+      if (isDueling) handleDuelLoss();
+    }
+
+   
+    window.addEventListener("pagehide", cleanupSession);
+
+    
+    window.addEventListener("beforeunload", e => {
+      cleanupSession();
+      if (running) {
+        e.preventDefault();
+        e.returnValue = ""; 
+      }
+    });
+
+   
+    //  INIT
+    updateDisplay();
+    updatePhaseUI();
+    updateScoreDisplay();
+  </script>
+</body>
+</html>
