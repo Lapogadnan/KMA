@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kill My Assignments — Study Map</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+
+  <style>
+    .map-page {
+      min-height: calc(100vh - 47px);
+      display: grid;
+      grid-template-columns: 1fr 300px;
+    }
+
+    .map-area { 
+      position: relative; 
+      overflow: hidden; 
+    }
+
+    #leaflet-map { 
+      width: 100%; 
+      height: calc(100vh - 47px); 
+    }
+
+    .leaflet-bar {
+      border-radius: var(--r-sm);
+      border: 1px solid var(--stone-light);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .leaflet-control-zoom a {
+      background: var(--white);
+      color: var(--text-mid);
+      border: none;
+      border-radius: 0;
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .leaflet-control-zoom a:hover { 
+      background: var(--sage-light); 
+      color: var(--sage-deep); 
+    }
+    .leaflet-control-zoom-in { 
+      border-bottom: 1px solid var(--stone-light); 
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: var(--white);
+      border-radius: var(--r-md);
+      border: 1px solid var(--stone-light);
+      box-shadow: var(--shadow-md);
+      padding: 0; 
+      overflow: hidden;
+    }
+
+    .leaflet-popup-tip {
+       background: var(--white); 
+    }
+
+    .leaflet-popup-content { 
+      margin: 0; 
+      width: auto; 
+    }
+
+    .pin-popup {
+      display: flex; 
+      align-items: center; 
+      gap: 12px;
+      padding: 14px 16px; 
+      min-width: 230px;
+    }
+    .pin-popup-avatar {
+      width: 40px; 
+      height: 40px; 
+      border-radius: 50%; 
+      flex-shrink: 0;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-family: "Playfair Display", serif; font-size: 16px;
+      font-weight: 600; color: #fff;
+    }
+
+    .pin-popup-name { 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: var(--text-dark); 
+      line-height: 1.3; 
+    }
+
+    .pin-popup-sub  { 
+      font-size: 12px; 
+      color: var(--text-light); 
+      margin-top: 3px; 
+    }
+
+    .pin-popup-duel{ 
+      margin-left: auto; 
+    }
+
+    .map-panel {
+      background: var(--white);
+      border-left: 1px solid var(--stone-light);
+      box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column; 
+      overflow: hidden;
+    }
+
+    .map-panel-header {
+      background: var(--cream-dark);
+      border-bottom: 1px solid var(--stone-light);
+      padding: 22px 20px 18px;
+      flex-shrink: 0;
+    }
+
+    .map-panel-title {
+      font-size: 10px; 
+      font-weight: 500; 
+      color: var(--text-light);
+      letter-spacing: 0.8px; 
+      text-transform: uppercase; 
+      margin-bottom: 8px;
+    }
+
+    .map-count {
+      font-family: "Playfair Display", serif;
+      font-size: 34px; 
+      font-weight: 400; 
+      color: var(--sage-deep);
+      line-height: 1; 
+      margin-bottom: 3px;
+    }
+
+    .map-count-sub { 
+      font-size: 12px; 
+      color: var(--text-light); 
+    }
+
+    .map-body { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 16px; }
+    .map-body::-webkit-scrollbar { 
+      width: 5px; 
+    }
+    .map-body::-webkit-scrollbar-track { 
+      background: var(--cream); 
+    }
+    .map-body::-webkit-scrollbar-thumb { 
+      background: var(--stone-light); 
+      border-radius: 99px; 
+    }
+
+    .map-section-label {
+      font-size: 10px; 
+      font-weight: 500; 
+      color: var(--text-light);
+      letter-spacing: 0.8px; 
+      text-transform: uppercase; 
+      margin-bottom: 12px;
+    }
+
+    .nearby-item {
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      padding: 10px 12px; 
+      margin-bottom: 8px;
+      background: var(--white); 
+      border: 1px solid var(--stone-light);
+      border-radius: var(--r-md); 
+      box-shadow: var(--shadow-sm);
+      cursor: pointer; 
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .nearby-item:hover { 
+      background: var(--sage-light); 
+      box-shadow: var(--shadow-md); 
+    }
+
+    .nearby-item:last-child { 
+      margin-bottom: 0; 
+    }
+
+    .nearby-top { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      width: 100%; 
+    }
+
+    .nearby-info { 
+      flex: 1; 
+      min-width: 0; 
+    }
+
+    .nearby-name {
+      font-size: 13px; 
+      font-weight: 500; 
+      color: var(--text-dark);
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+    }
+
+    .nearby-subject { 
+      font-size: 11px; 
+      color: var(--text-light); 
+      margin-top: 2px; 
+    }
+
+    .nearby-avatar {
+      width: 36px; 
+      height: 36px; 
+      border-radius: 50%; 
+      flex-shrink: 0;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-family: "Playfair Display", serif; 
+      font-size: 14px;
+      font-weight: 600; 
+      color: #fff;
+    }
+
+    .challenge-btn { 
+      flex-shrink: 0; 
+    }
+
+    .duel-btn {
+      padding: 5px 12px; 
+      background: var(--sage-deep); 
+      color: #fff;
+      border: none; 
+      border-radius: var(--r-sm); 
+      font-size: 11px; 
+      font-weight: 500;
+      font-family: "DM Sans",sans-serif; 
+      cursor: pointer; 
+      transition: background 0.15s;
+    }
+
+    .duel-btn:hover { 
+      background: var(--moss); 
+    }
+
+    .nearby-empty { 
+      padding: 32px 8px; 
+      text-align: center; 
+    }
+
+    .nearby-empty-icon { 
+      font-size: 28px; 
+      display: block; 
+      margin-bottom: 12px; 
+      opacity: 0.4; }
+    .nearby-empty-title { 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: var(--text-dark); 
+      margin-bottom: 6px; 
+    }
+
+    .nearby-empty-sub{ 
+      font-size: 12px; 
+      color: var(--text-light); 
+      line-height: 1.65; 
+    }
+
+    #duel-toast {
+      position: fixed; 
+      bottom: 32px; 
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bark); 
+      color: #fff;
+      padding: 13px 24px; 
+      border-radius: var(--r-md);
+      font-size: 13px; 
+      font-family: "DM Sans", sans-serif; 
+      font-weight: 500;
+      opacity: 0; 
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; 
+      z-index: 9999;
+    }
+
+    #duel-toast.show { 
+      opacity: 1; 
+      transform: translateX(-50%) translateY(0); 
+    }
+  </style>
+  
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-left">
+      <a class="nav-logo" href="index.html">Kill My <span>Assignments</span></a>
+      <div class="nav-tabs">
+        <a class="nav-tab" href="index.html">Timer</a>
+        <a class="nav-tab" href="leaderboard.html">Leaderboard</a>
+        <a class="nav-tab active" href="map.html">Study map</a>
+        <a class="nav-tab" href="about-us.html">About</a>
+      </div>
+    </div>
+    <div class="nav-right" id="nav-right"></div>
+  </nav>
+
+  <div class="map-page">
+
+    <div class="map-area">
+      <div id="leaflet-map"></div>
+    </div>
+
+    <div class="map-panel">
+      <div class="map-panel-header">
+        <div class="map-panel-title">Online now</div>
+        <div class="map-count" id="studying-count">0</div>
+        <div class="map-count-sub">students studying now</div>
+      </div>
+      <div class="map-body">
+        <div class="map-section-label">Students online</div>
+        <div id="nearby-list">
+          <div class="nearby-empty">
+            <span class="nearby-empty-icon">🗺</span>
+            <div class="nearby-empty-title">No one nearby yet</div>
+            <div class="nearby-empty-sub">Start a session to appear on the map — others will show up here as they join.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="duel-toast"></div>
+
+  <script>
+    const map = L.map('leaflet-map', {
+      center: [10.55, -61.25],
+      zoom: 10,
+      zoomControl: false,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd', maxZoom: 19,
+    }).addTo(map);
+
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+    const COLOURS = [
+      ['#5a8a5e','#2e5232'],
+      ['#4a7a9a','#1e4a6a'],
+      ['#8B6F47','#4a3018'],
+      ['#7a6aaa','#3a2a7a'],
+      ['#aa6a5a','#6a2a1a'],
+    ];
+    function colourFor(name) { return COLOURS[name.charCodeAt(0) % COLOURS.length]; }
+
+    function makeIcon(initial, isYou, cp) {
+      const [c1, c2] = cp;
+      const gid = 'g' + Math.random().toString(36).slice(2, 8);
+      const ring = isYou ? `<circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>` : '';
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">
+        <defs>
+          <linearGradient id="${gid}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${c1}"/>
+            <stop offset="100%" stop-color="${c2}"/>
+          </linearGradient>
+        </defs>
+        <!-- Circle body -->
+        <circle cx="18" cy="18" r="18" fill="url(#${gid})"/>
+        ${ring}
+        <!-- Initial -->
+        <text x="18" y="23" text-anchor="middle"
+              font-family="'Playfair Display',Georgia,serif"
+              font-size="14" font-weight="600" fill="white">${initial}</text>
+        <!-- Pointer nub -->
+        <polygon points="11,33 25,33 18,46" fill="${c2}"/>
+      </svg>`;
+      return L.divIcon({
+        className: '',
+        html: svg,
+        iconSize:   [36, 46],
+        iconAnchor: [18, 46],
+        popupAnchor:[0, -50],
+      });
+    }
+
+    const activeMarkers = {};
+
+    function upsertMarker(uid, d, isYou, statusStr) {
+      if (!d.lat || !d.lng) return;
+      const name    = d.displayName || 'Student';
+      const initial = name.charAt(0).toUpperCase();
+      const cp      = colourFor(name);
+
+      const popupHTML = `
+        <div class="pin-popup">
+          <div class="pin-popup-avatar" style="background:linear-gradient(135deg,${cp[0]},${cp[1]})">${initial}</div>
+          <div>
+            <div class="pin-popup-name">${name}${isYou ? ' <span style="color:#5d9e37">(you)</span>' : ''}</div>
+            <div class="pin-popup-sub">${statusStr}</div>
+          </div>
+          ${!isYou ? `<button class="duel-btn pin-popup-duel" onclick="sendDuel('${uid}','${name}')">⚔ Duel</button>` : ''}
+        </div>`;
+
+      if (activeMarkers[uid]) {
+        activeMarkers[uid].setLatLng([d.lat, d.lng]);
+        activeMarkers[uid].setIcon(makeIcon(initial, isYou, cp));
+        activeMarkers[uid].setPopupContent(popupHTML);
+      } else {
+        activeMarkers[uid] = L.marker([d.lat, d.lng], { icon: makeIcon(initial, isYou, cp) })
+          .addTo(map)
+          .bindPopup(popupHTML, { maxWidth: 320 });
+      }
+    }
+
+    function removeMarker(uid) {
+      if (activeMarkers[uid]) { map.removeLayer(activeMarkers[uid]); delete activeMarkers[uid]; }
+    }
+
+    // sendDuel is populated by the module script once auth + db are ready.
+    // Falls back to a toast-only stub if the module hasn't loaded yet.
+    window.sendDuel = function(uid, name) {
+      const t = document.getElementById('duel-toast');
+      t.textContent = `⚔  Duel request sent to ${name}`;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    };
+  </script>
+
+  <script type="module">
+    import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged }
+                               from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, doc, addDoc, getDocs, onSnapshot,
+             query, where, serverTimestamp }
+                               from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { firebaseConfig }  from "./firebase-config.js";
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    let currentUid       = null;
+    let currentUserName  = null;
+    let allSessions      = new Map();
+
+
+    function showDuelToast(msg) {
+      const t = document.getElementById('duel-toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    window.sendDuel = async function(toUid, toName) {
+      if (!currentUid) { showDuelToast("Sign in to send a duel request."); return; }
+      try {
+       
+        const [fromSnap, toSnap] = await Promise.all([
+          getDocs(query(collection(db, "duels"), where("fromUid", "==", currentUid))),
+          getDocs(query(collection(db, "duels"), where("toUid",   "==", currentUid))),
+        ]);
+        const busy = [...fromSnap.docs, ...toSnap.docs]
+          .some(d => ["pending", "active"].includes(d.data().status));
+        if (busy) { showDuelToast("You're already in a duel!"); return; }
+
+        const duelRef = await addDoc(collection(db, "duels"), {
+          fromUid:   currentUid,
+          toUid,
+          fromName:  currentUserName,
+          toName,
+          status:    "pending",
+          expiresAt: Date.now() + 5 * 60 * 1000,
+          createdAt: serverTimestamp(),
+        });
+        showDuelToast(`⚔  Sent to ${toName} — heading to timer when accepted…`);
+
+        const unsub = onSnapshot(doc(db, "duels", duelRef.id), snap => {
+          const s = snap.data()?.status;
+          if (s === "active") {
+            unsub();
+            window.location.href = "index.html";
+          } else if (s === "declined" || s === "cancelled" ||
+                     (snap.data()?.expiresAt && snap.data().expiresAt < Date.now())) {
+            unsub();
+            showDuelToast(`${toName} didn't accept the duel.`);
+          }
+        });
+      } catch (err) {
+        console.error("Duel send failed:", err);
+        showDuelToast("Failed to send duel request.");
+      }
+    };
+
+    function getStatusStr(d) {
+      if (d.running && d.phase === "work")  return `Studying${d.subject ? " · " + d.subject : ""}`;
+      if (d.running && d.phase === "break") return "On a break 🌿";
+      if (d.running === false)              return "Paused";
+      return "In a session";
+    }
+
+    function renderMap() {
+      const liveUids = new Set(allSessions.keys());
+      document.getElementById("studying-count").textContent = liveUids.size;
+
+      if (liveUids.size === 0) {
+        document.getElementById("nearby-list").innerHTML = `
+          <div class="nearby-empty">
+            <span class="nearby-empty-icon">🗺</span>
+            <div class="nearby-empty-title">No one studying yet</div>
+            <div class="nearby-empty-sub">
+              Start a session to appear on the map.<br>
+              Others will show up here as they join.
+            </div>
+          </div>`;
+        Object.keys(activeMarkers).forEach(removeMarker);
+        return;
+      }
+
+      const COLOURS = [['#5a8a5e','#2e5232'],['#4a7a9a','#1e4a6a'],['#8B6F47','#4a3018'],['#7a6aaa','#3a2a7a'],['#aa6a5a','#6a2a1a']];
+      const colourFor = n => COLOURS[n.charCodeAt(0) % COLOURS.length];
+
+      let html = "";
+      allSessions.forEach((d, uid) => {
+        const isYou   = uid === currentUid;
+        const name    = d.displayName || "Student";
+        const initial = name.charAt(0).toUpperCase();
+        const cp      = colourFor(name);
+        const status  = getStatusStr(d);
+
+        upsertMarker(uid, d, isYou, status);
+
+        html += `<div class="nearby-item" data-uid="${uid}">
+          <div class="nearby-top">
+            <div class="nearby-avatar" style="background:linear-gradient(135deg,${cp[0]},${cp[1]})">${initial}</div>
+            <div class="nearby-info">
+              <div class="nearby-name">${name}${isYou ? ' <span style="color:#5d9e37">(you)</span>' : ''}</div>
+              <div class="nearby-subject">${status}</div>
+            </div>
+            ${!isYou ? `<button class="duel-btn challenge-btn" onclick="sendDuel('${uid}','${name}')">⚔ Duel</button>` : ''}
+          </div>
+        </div>`;
+      });
+
+      document.getElementById("nearby-list").innerHTML = html;
+      Object.keys(activeMarkers).forEach(uid => { if (!liveUids.has(uid)) removeMarker(uid); });
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (!user) { window.location.href = "login.html"; return; }
+      currentUid      = user.uid;
+      currentUserName = user.displayName || user.email.split("@")[0];
+
+      const name    = currentUserName;
+      const initial = name.charAt(0).toUpperCase();
+      document.getElementById("nav-right").innerHTML = `
+        <a href="dashboard.html" class="nav-user-pill">
+          <div class="nav-user-dot">${initial}</div>
+          <span>${name.split(" ")[0]}</span>
+        </a>`;
+
+
+      const STALE_MS = 4 * 60 * 60 * 1000;
+      onSnapshot(collection(db, "activeSessions"), snap => {
+        allSessions.clear();
+        snap.forEach(d => {
+          const data = d.data();
+          const age  = Date.now() - (data.lastUpdated?.toMillis?.() || 0);
+          if (age < STALE_MS) allSessions.set(d.id, data);
+        });
+        renderMap();
+      });
+    });
+
+    document.getElementById("nearby-list").addEventListener("click", e => {
+      const item = e.target.closest(".nearby-item");
+      if (!item || e.target.classList.contains("challenge-btn")) return;
+      const uid = item.dataset.uid;
+      if (activeMarkers[uid]) {
+        map.flyTo(activeMarkers[uid].getLatLng(), 14, { duration: 1.2 });
+        activeMarkers[uid].openPopup();
+      }
+    });
+  </script>
+</body>
+</html>
