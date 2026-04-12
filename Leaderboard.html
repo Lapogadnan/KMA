@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kill My Assignments — Leaderboard</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    
+    .lb-page {
+      min-height: calc(100vh - 47px);
+      background: var(--cream);
+      padding: 36px 40px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+    }
+    
+    .page-title { 
+      font-family:"Playfair Display",serif; 
+      font-size:24px; 
+      font-weight:500; 
+      color:var(--text-dark); 
+      margin-bottom:24px; 
+    }
+
+    .empty-state {
+      background: var(--white); 
+      border: 1px solid var(--stone-light);
+      border-radius: var(--r-md); 
+      padding: 56px 24px;
+      text-align: center; 
+      box-shadow: var(--shadow-sm);
+    }
+
+    .empty-icon  { 
+      font-size: 40px; 
+      margin-bottom: 14px; 
+    }
+
+    .empty-title { 
+      font-family:"Playfair Display",serif; 
+      font-size:20px; 
+      color:var(--text-dark); 
+      margin-bottom:8px; 
+    }
+
+    .empty-sub   { 
+      font-size:13px; 
+      color:var(--text-light); 
+      line-height:1.6; 
+      margin-bottom:20px; 
+    }
+
+    .lb-table { 
+      background:var(--white); 
+      border-radius:var(--r-md); 
+      overflow:hidden; 
+      border:1px solid var(--stone-light); 
+      box-shadow:var(--shadow-sm); 
+    }
+
+    .lb-header {
+      display:grid; 
+      grid-template-columns:36px 1fr 90px 90px 80px;
+      padding:12px 20px; 
+      background:var(--cream-dark);
+      border-bottom:1px solid var(--stone-light);
+      font-size:11px; 
+      font-weight:500; 
+      color:var(--text-light);
+      letter-spacing:0.5px; 
+      text-transform:uppercase;
+    }
+
+    .lb-row {
+      display:grid; 
+      grid-template-columns:36px 1fr 90px 90px 80px;
+      padding:12px 20px; 
+      border-bottom:1px solid var(--cream-dark);
+      align-items:center; 
+      transition:background 0.15s;
+    }
+
+    .lb-row:last-child{ 
+      border-bottom:none; 
+    }
+
+    .lb-row:hover{ 
+      background:var(--sage-light); 
+    }
+
+    .lb-row.mine{ 
+      background:var(--sage-light); 
+    }
+
+    .lb-rank{ 
+      font-family:"Playfair Display",serif; 
+      font-size:15px; 
+      color:var(--text-light); 
+    }
+
+    .lb-user{ 
+      display:flex; 
+      align-items:center; 
+      gap:10px; 
+    }
+
+    .lb-avatar{ 
+      width:30px; 
+      height:30px; 
+      font-size:11px; 
+    }
+
+    .lb-username{ 
+      font-size:13px; 
+      font-weight:500; 
+      color:var(--text-dark); 
+    }
+
+    .lb-you-tag{ 
+      font-size:10px; 
+      color:var(--sage-deep); 
+      background:var(--sage-light); 
+      padding:2px 7px; 
+      border-radius:99px; 
+      margin-left:6px; 
+    }
+
+    .lb-cell{ 
+      font-size:13px; 
+      color:var(--text-mid); 
+      text-align:right; 
+    }
+
+    .lb-cell.score { 
+      color:var(--sage-deep); 
+      font-weight:500; 
+    }
+
+    .duel-card { 
+      background:linear-gradient(135deg,var(--sage-deep),var(--moss)); 
+      border-radius:var(--r-md); 
+      padding:24px; 
+      margin-bottom:20px; 
+      color:#fff; 
+    }
+
+    .duel-title { 
+      font-family:"Playfair Display",serif; 
+      font-size:18px; 
+      margin-bottom:6px; 
+    }
+
+    .duel-sub   { 
+      font-size:12px; 
+      opacity:0.75; 
+      margin-bottom:20px; 
+      line-height:1.6; 
+    }
+    .duel-vs { 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      gap:16px; 
+      margin-bottom:20px; 
+    }
+
+    .duel-player { 
+      text-align:center; 
+    }
+    .duel-player-av { 
+      width:44px; 
+      height:44px; 
+      border-radius:50%; 
+      margin:0 auto 6px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-size:16px; 
+      font-weight:600; 
+      border:2px solid rgba(255,255,255,0.5); 
+    }
+
+    .duel-player-name { 
+      font-size:11px; 
+      opacity:0.85; 
+    }
+    .vs-badge { 
+      font-family:"Playfair Display",serif; 
+      font-size:20px; opacity:0.6; 
+    }
+
+    .btn-challenge { 
+      width:100%; 
+      padding:11px; 
+      background:rgba(255,255,255,0.2); 
+      border:1.5px solid rgba(255,255,255,0.4); 
+      border-radius:var(--r-sm); 
+      color:#fff; 
+      font-size:13px; 
+      font-weight:500; 
+      cursor:pointer; 
+      font-family:"DM Sans",sans-serif; 
+      transition:background 0.2s; 
+    }
+
+    .btn-challenge:hover { background:rgba(255,255,255,0.3); }
+
+    .badges-wrap { 
+      background:var(--white); 
+      border-radius:var(--r-md); 
+      padding:20px 22px; 
+      border:1px solid var(--stone-light); 
+      box-shadow:var(--shadow-sm); 
+    }
+
+    .badge-grid  { 
+      display:grid; 
+      grid-template-columns:repeat(4,1fr); 
+      gap:10px; 
+      margin-top:12px; 
+    }
+
+    .badge-item  { 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center; 
+      gap:5px; }
+    .badge-icon  { 
+      width:42px; 
+      height:42px; 
+      border-radius:10px; 
+      background:var(--sage-light); 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-size:20px; 
+    }
+
+    .badge-icon.locked { 
+      opacity:0.3; 
+      filter:grayscale(1); 
+    }
+
+    .badge-name  { 
+      font-size:10px; 
+      color:var(--text-light); 
+      text-align:center; 
+    }
+
+    .loading-text { 
+      text-align:center; 
+      padding:32px; 
+      font-size:13px; 
+      color:var(--text-light); 
+    }
+
+    .online-dot-lb {
+      display: inline-block; 
+      width: 8px; 
+      height: 8px; 
+      border-radius: 50%;
+      background: var(--stone-light); 
+      flex-shrink: 0; 
+      margin-right: 4px;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .online-dot-lb.on { 
+      background: #68C76A; 
+      box-shadow: 0 0 5px rgba(104,199,106,0.55); 
+    }
+
+    .friend-btn {
+      font-size: 10px; 
+      padding: 2px 9px; 
+      border-radius: 99px;
+      border: 1.5px solid; 
+      cursor: pointer;
+      font-family: "DM Sans",sans-serif; 
+      font-weight: 500;
+      transition: all 0.15s; 
+      line-height: 1.7; 
+      white-space: nowrap;
+    }
+
+    .friend-btn.add     { 
+      color: var(--sage-deep); 
+      border-color: var(--sage-deep); 
+      background: transparent; 
+    }
+
+    .friend-btn.add:hover { 
+      background: var(--sage-light); 
+    }
+
+    .friend-btn.pending { 
+      color: var(--stone); 
+      border-color: var(--stone-light); 
+      background: transparent; 
+      cursor: default; 
+    }
+
+    .friend-btn.accept  { 
+      color: #fff; 
+      background: var(--sage-deep); 
+      border-color: var(--sage-deep); 
+    }
+
+    .friend-btn.accept:hover { 
+      background: var(--moss); 
+    }
+
+    .friend-btn.friends { 
+      color: var(--sage); 
+      border-color: var(--sage-light); 
+      background: var(--sage-light); 
+      cursor: default; 
+    }
+
+    .lb-bg {
+      position: fixed; 
+      inset: 0;
+      width: 100%; 
+      height: 100%;
+      object-fit: cover; 
+      object-position: center;
+      z-index: 0; 
+      opacity: 0.40; 
+      pointer-events: none;
+    }
+    
+    .lb-page { 
+      position: relative; z-index: 1; 
+    }
+    
+  </style>
+</head>
+<body>
+
+  <img class="lb-bg"
+    src="https://images2.alphacoders.com/123/thumb-1920-1234635.png"
+    alt="">
+
+  <nav class="nav">
+    <div class="nav-left">
+      <a class="nav-logo" href="timer.html">Kill My <span>Assignments</span></a>
+      <div class="nav-tabs">
+        <a class="nav-tab" href="timer.html">Timer</a>
+        <a class="nav-tab active" href="leaderboard.html">Leaderboard</a>
+        <a class="nav-tab" href="map.html">Study map</a>
+        <a class="nav-tab" href="about-us.html">About</a>
+      </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+    </div>
+  </nav>
+
+ 
+  <div class="lb-page">
+
+    <div>
+      <div class="page-title">This week's leaderboard</div>
+      
+      <div id="lb-content">
+        <div class="loading-text">Loading scores…</div>
+      </div>
+    </div>
+
+    
+    <div>
+      <div class="duel-card">
+        <div class="duel-title">Focus Duel</div>
+        <div class="duel-sub">Challenge anyone on the map. First to quit loses their session progress.</div>
+        <div class="duel-vs">
+          <div class="duel-player">
+            <div class="duel-player-av" id="duel-avatar" style="background:rgba(255,255,255,0.2)">?</div>
+            <div class="duel-player-name" id="duel-name">You</div>
+          </div>
+          <div class="vs-badge">vs</div>
+          <div class="duel-player">
+            <div class="duel-player-av" style="background:rgba(139,111,71,0.4)">?</div>
+            <div class="duel-player-name">Anyone</div>
+          </div>
+        </div>
+        <button class="btn-challenge" onclick="window.location.href='map.html'">⚔ Challenge someone on the map</button>
+      </div>
+
+      <div class="badges-wrap">
+        <div class="card-title">Your badges</div>
+        <div class="badge-grid" id="badges-grid">
+          <div class="badge-item"><div class="badge-icon locked">🌱</div><div class="badge-name">First session</div></div>
+          <div class="badge-item"><div class="badge-icon locked">🔥</div><div class="badge-name">7-day streak</div></div>
+          <div class="badge-item"><div class="badge-icon locked">⚔️</div><div class="badge-name">Duel winner</div></div>
+          <div class="badge-item"><div class="badge-icon locked">🌿</div><div class="badge-name">Encourager</div></div>
+          <div class="badge-item"><div class="badge-icon locked">🏆</div><div class="badge-name">Top 3</div></div>
+          <div class="badge-item"><div class="badge-icon locked">🌳</div><div class="badge-name">50 sessions</div></div>
+          <div class="badge-item"><div class="badge-icon locked">⭐</div><div class="badge-name">100h studied</div></div>
+          <div class="badge-item"><div class="badge-icon locked">🦉</div><div class="badge-name">Night owl</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="lb-toast"></div>
+
+
+  <script type="module">
+    import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged }
+                                from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc,
+             onSnapshot, query, orderBy, where, arrayUnion }
+                                from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { firebaseConfig }   from "./firebase-config.js";
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    const REQUEST_EXPIRY_MS = 48 * 60 * 60 * 1000;
+
+    function showToast(msg, type = "success") {
+      const t = document.getElementById("lb-toast");
+      t.textContent = msg;
+      t.className   = `toast ${type} show`;
+      setTimeout(() => t.classList.remove("show"), 3500);
+    }
+    window.sendRequest = async function(toUid, toName, fromUid, fromName) {
+      const reqId     = `${fromUid}_${toUid}`;
+      const reverseId = `${toUid}_${fromUid}`;
+      try {
+        const [existing, reverse] = await Promise.all([
+          getDoc(doc(db, "friendRequests", reqId)),
+          getDoc(doc(db, "friendRequests", reverseId)),
+        ]);
+
+        if (existing.exists()) {
+          showToast("Request already sent!", "success"); return;
+        }
+
+        if (reverse.exists()
+            && reverse.data().status === "pending"
+            && reverse.data().expiresAt > Date.now()) {
+          window.acceptRequest(reverseId, toUid, fromUid); return;
+        }
+
+        await setDoc(doc(db, "friendRequests", reqId), {
+          fromUid, toUid, fromName, toName,
+          status:    "pending",
+          createdAt: Date.now(),
+          expiresAt: Date.now() + REQUEST_EXPIRY_MS,
+        });
+
+        const btn = document.querySelector(`[data-req-uid="${toUid}"]`);
+        if (btn) {
+          btn.textContent = "⏳ Sent";
+          btn.className   = "friend-btn pending";
+          btn.disabled    = true;
+        }
+        showToast(`Friend request sent to ${toName} — expires in 48 hrs 🌿`);
+      } catch (err) {
+        showToast("Failed to send request — try again.", "error");
+        console.error(err);
+      }
+    };
+
+    window.acceptRequest = async function(reqId, fromUid, myUid) {
+      try {
+        await updateDoc(doc(db, "friendRequests", reqId), { status: "accepted" });
+        await Promise.all([
+          updateDoc(doc(db, "users", myUid),   { friends: arrayUnion(fromUid) }),
+          updateDoc(doc(db, "users", fromUid), { friends: arrayUnion(myUid)   }),
+        ]);
+        showToast("Friend added! 🌿");
+        setTimeout(() => window.location.reload(), 1500);
+      } catch (err) {
+        showToast("Failed to accept — try again.", "error");
+        console.error(err);
+      }
+    };
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) { window.location.href = "login.html"; return; }
+
+      const name    = user.displayName || user.email.split("@")[0];
+      const initial = name.charAt(0).toUpperCase();
+
+      document.getElementById("nav-right").innerHTML = `
+        <a href="dashboard.html" class="nav-user-pill">
+          <div class="nav-user-dot">${initial}</div>
+          <span>${name.split(" ")[0]}</span>
+        </a>`;
+      document.getElementById("duel-avatar").textContent = initial;
+      document.getElementById("duel-name").textContent   = name.split(" ")[0];
+
+      const [mySnap, sentSnap, receivedSnap] = await Promise.all([
+        getDoc(doc(db, "users", user.uid)),
+        getDocs(query(collection(db, "friendRequests"), where("fromUid", "==", user.uid))),
+        getDocs(query(collection(db, "friendRequests"), where("toUid",   "==", user.uid))),
+      ]).catch(() => [null, { forEach(){} }, { forEach(){} }]);
+
+      const myFriends = new Set(mySnap?.data()?.friends || []);
+
+  
+      const sentRequests     = new Map(); 
+      const receivedRequests = new Map();
+      sentSnap.forEach(d => {
+        const r = d.data();
+        if (r.status === "pending" && r.expiresAt > Date.now()) sentRequests.set(r.toUid, d.id);
+      });
+      receivedSnap.forEach(d => {
+        const r = d.data();
+        if (r.status === "pending" && r.expiresAt > Date.now()) receivedRequests.set(r.fromUid, d.id);
+      });
+
+      let onlineUids = new Set();
+      onSnapshot(collection(db, "activeSessions"), snap => {
+        onlineUids = new Set(snap.docs.map(d => d.id));
+        document.querySelectorAll(".online-dot-lb").forEach(el => {
+          el.classList.toggle("on", onlineUids.has(el.dataset.uid));
+        });
+      });
+
+      try {
+        const usersSnap = await getDocs(
+          query(collection(db, "users"), orderBy("weeklyScore", "desc"))
+        );
+        const content = document.getElementById("lb-content");
+
+        if (usersSnap.empty) {
+          content.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">🏆</div>
+              <div class="empty-title">No scores yet</div>
+              <div class="empty-sub">Be the first to complete a session and appear here.<br>Every finished work cycle earns points.</div>
+              <a href="timer.html" class="btn-primary" style="display:inline-block;width:auto;padding:12px 28px;">Start a session →</a>
+            </div>`;
+          return;
+        }
+
+        const colours = ["#7AABB8,#4A6D7A","#8B6F47,#C4A882","#C87E7E,#9E4A4A",
+                         "#5a7a5c,#2e4a30","#B89E4A,#8A7520","#9B8BC4,#6A5A9E"];
+
+        let rows = "";
+        let rank = 1;
+        usersSnap.forEach(docSnap => {
+          const d     = docSnap.data();
+          const uid   = docSnap.id;
+          const isMe  = uid === user.uid;
+          const dName = d.displayName || "Anonymous";
+          const dInit = dName.charAt(0).toUpperCase();
+          const score = (d.weeklyScore  || 0).toLocaleString();
+          const sess  = d.totalSessions || 0;
+
+          const hours = (d.totalHours   || 0).toFixed(2);
+          const bg    = colours[dName.charCodeAt(0) % colours.length];
+
+          let friendBtn = "";
+          if (!isMe) {
+            if (myFriends.has(uid)) {
+              friendBtn = `<button class="friend-btn friends" disabled>👥 Friends</button>`;
+            } else if (sentRequests.has(uid)) {
+              friendBtn = `<button class="friend-btn pending" disabled>⏳ Sent</button>`;
+            } else if (receivedRequests.has(uid)) {
+              const reqId = receivedRequests.get(uid);
+              friendBtn   = `<button class="friend-btn accept" data-req-uid="${uid}"
+                onclick="acceptRequest('${reqId}','${uid}','${user.uid}')">✓ Accept</button>`;
+            } else {
+              friendBtn   = `<button class="friend-btn add" data-req-uid="${uid}"
+                onclick="sendRequest('${uid}','${dName.replace(/'/g,"\\'")}','${user.uid}','${name.replace(/'/g,"\\'")}')">➕ Add</button>`;
+            }
+          }
+
+          rows += `
+            <div class="lb-row${isMe ? " mine" : ""}">
+              <div class="lb-rank">${rank}</div>
+              <div class="lb-user">
+                <span class="online-dot-lb" data-uid="${uid}"></span>
+                <div class="avatar lb-avatar" style="background:linear-gradient(135deg,${bg})">${dInit}</div>
+                <div>
+                  <div class="lb-username">
+                    ${dName}${isMe ? '<span class="lb-you-tag">you</span>' : ""}
+                  </div>
+                  ${friendBtn ? `<div style="margin-top:4px">${friendBtn}</div>` : ""}
+                </div>
+              </div>
+              <div class="lb-cell score">${score}</div>
+              <div class="lb-cell">${sess}</div>
+              <div class="lb-cell">${hours} hrs</div>
+            </div>`;
+          rank++;
+        });
+
+        content.innerHTML = `
+          <div class="lb-table">
+            <div class="lb-header">
+              <div>#</div><div>Student</div>
+              <div style="text-align:right">Score</div>
+              <div style="text-align:right">Sessions</div>
+              <div style="text-align:right">Hours</div>
+            </div>
+            ${rows}
+          </div>`;
+
+        document.querySelectorAll(".online-dot-lb").forEach(el => {
+          el.classList.toggle("on", onlineUids.has(el.dataset.uid));
+        });
+
+      } catch (err) {
+        console.error("Leaderboard fetch failed:", err);
+        document.getElementById("lb-content").innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">Couldn't load scores</div>
+            <div class="empty-sub">${err.message}</div>
+          </div>`;
+      }
+    });
+  </script>
+</body>
+</html>
