@@ -9,6 +9,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="shared.css">
+  <script src="face-utils.js"></script>
+  <script src="audio.js"></script>
 
   <style>
     /* ── Layout ── */
@@ -19,8 +21,15 @@
     }
 
     /* ── Map area ── */
-    .map-area { position: relative; overflow: hidden; }
-    #leaflet-map { width: 100%; height: calc(100vh - 47px); }
+    .map-area { 
+        position: relative; 
+        overflow: hidden; 
+    }
+
+    #leaflet-map { 
+        width: 100%; 
+        height: calc(100vh - 47px); 
+    }
 
     /* ── Leaflet zoom controls — site style ── */
     .leaflet-bar {
@@ -30,23 +39,35 @@
       overflow: hidden;
     }
     .leaflet-control-zoom a {
-      background: var(--white) !important;
-      color: var(--text-mid) !important;
-      border: none !important;
-      border-radius: 0 !important;
-      font-size: 16px !important;
-      font-weight: 400 !important;
+      background: var(--white);
+      color: var(--text-mid);
+      border: none;
+      border-radius: 0;
+      font-size: 16px;
+      font-weight: 400;
     }
-    .leaflet-control-zoom a:hover { background: var(--sage-light) !important; color: var(--sage-deep) !important; }
-    .leaflet-control-zoom-in { border-bottom: 1px solid var(--stone-light) !important; }
+    .leaflet-control-zoom a:hover { 
+        background: var(--sage-light); 
+        color: var(--sage-deep) 
+     }
+    .leaflet-con trol-zoom-in { border-bottom: 1px solid var(--stone-light); }
 
     /* ── Map popup — site style ── */
     .leaflet-popup-content-wrapper {
-      background: var(--white) !important;
-      border-radius: var(--r-md) !important;
-      border: 1px solid var(--stone-light) !important;
-      box-shadow: var(--shadow-md) !important;
-      padding: 0 !important; overflow: hidden;
+      background: var(--white);
+      border-radius: var(--r-md);
+      border: 1px solid var(--stone-light);
+      box-shadow: var(--shadow-md) ;
+      padding: 0; 
+      overflow: hidden;
+    }
+
+    .leaflet-popup-tip { 
+        background: var(--white); 
+    }
+
+    .leaflet-popup-content { margin: 0; 
+        width: auto; 
     }
     .leaflet-popup-tip { background: var(--white) !important; }
     .leaflet-popup-content { margin: 0 !important; width: auto !important; }
@@ -55,22 +76,45 @@
       display: flex; align-items: center; gap: 12px;
       padding: 14px 16px; min-width: 230px;
     }
+
     .pin-popup-avatar {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: "Playfair Display", serif; font-size: 16px;
-      font-weight: 600; color: #fff;
+      width: 40px; 
+      height: 40px; 
+      border-radius: 2px; 
+      flex-shrink: 0;
+      display: block; 
+      object-fit: cover; 
+      image-rendering: pixelated;
     }
     .pin-popup-name { font-size: 13px; font-weight: 500; color: var(--text-dark); line-height: 1.3; }
     .pin-popup-sub  { font-size: 12px; color: var(--text-light); margin-top: 3px; }
     .pin-popup-duel { margin-left: auto; }
+
+    .pin-popup-name { 
+        font-size: 13px; 
+        font-weight: 500; 
+        color: var(--text-dark); 
+        line-height: 1.3; 
+    }
+
+    .pin-popup-sub  { 
+        font-size: 12px; 
+        color: var(--text-light); 
+        margin-top: 3px;
+     }
+
+    .pin-popup-duel { 
+        margin-left: auto; 
+    }
 
     /* ── Right panel ── */
     .map-panel {
       background: var(--white);
       border-left: 1px solid var(--stone-light);
       box-shadow: var(--shadow-sm);
-      display: flex; flex-direction: column; overflow: hidden;
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden;
     }
     .map-panel-header {
       background: var(--cream-dark);
@@ -83,17 +127,39 @@
       letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px;
     }
     .map-count {
-      font-family: "Playfair Display", serif;
-      font-size: 34px; font-weight: 400; color: var(--sage-deep);
-      line-height: 1; margin-bottom: 3px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 22px; 
+    font-weight: 400; 
+    color: var(--sage-deep);
+    line-height: 1.25;
+     margin-bottom: 6px;
     }
     .map-count-sub { font-size: 12px; color: var(--text-light); }
 
+    .map-count-sub { 
+        font-size: 12px; 
+        color: var(--text-light);
+     }
+
     /* Panel body */
-    .map-body { flex: 1; overflow-y: auto; padding: 16px; }
-    .map-body::-webkit-scrollbar { width: 5px; }
-    .map-body::-webkit-scrollbar-track { background: var(--cream); }
-    .map-body::-webkit-scrollbar-thumb { background: var(--stone-light); border-radius: 99px; }
+    .map-body { 
+        flex: 1; overflow-y: auto; 
+        padding: 16px; 
+    }
+
+    .map-body::-webkit-scrollbar {
+         width: 5px; 
+        }
+
+    .map-body::-webkit-scrollbar-track { 
+        background: var(--cream);
+     }
+
+    .map-body::-webkit-scrollbar-thumb { 
+        background: var(--stone-light); 
+        border-radius: 99px; 
+    }
+
 
     .map-section-label {
       font-size: 10px; font-weight: 500; color: var(--text-light);
@@ -102,26 +168,62 @@
 
     /* ── Nearby list items ── */
     .nearby-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; margin-bottom: 8px;
-      background: var(--white); border: 1px solid var(--stone-light);
-      border-radius: var(--r-md); box-shadow: var(--shadow-sm);
-      cursor: pointer; transition: background 0.15s, box-shadow 0.15s;
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      padding: 10px 12px; 
+      margin-bottom: 8px;
+      background: var(--white); 
+      border: 1px solid var(--stone-light);
+      border-radius: var(--r-md); 
+      box-shadow: var(--shadow-sm);
+      cursor: pointer; 
+      transition: background 0.15s, box-shadow 0.15s;
     }
-    .nearby-item:hover { background: var(--sage-light); box-shadow: var(--shadow-md); }
-    .nearby-item:last-child { margin-bottom: 0; }
-    .nearby-top { display: flex; align-items: center; gap: 10px; width: 100%; }
-    .nearby-info { flex: 1; min-width: 0; }
+
+    .nearby-item:hover {
+         background: var(--sage-light); 
+         box-shadow: var(--shadow-md);
+         }
+
+    .nearby-item:last-child { 
+        margin-bottom: 0; 
+    }
+    .nearby-top { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        width: 100%; 
+    }
+
+    .nearby-info { 
+        flex: 1; 
+        min-width: 0; 
+    }
+
     .nearby-name {
       font-size: 13px; font-weight: 500; color: var(--text-dark);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .nearby-subject { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+    .nearby-subject { 
+        font-size: 11px; 
+        color: var(--text-light); 
+        margin-top: 2px;
+     }
+
     .nearby-avatar {
-      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: "Playfair Display", serif; font-size: 14px;
-      font-weight: 600; color: #fff;
+      width: 36px; 
+      height: 36px; 
+      border-radius: 2px; 
+      flex-shrink: 0;
+      display: block; 
+      object-fit: cover; 
+      image-rendering: pixelated;
+    }
+
+    .challenge-btn { 
+        flex-shrink: 0; 
     }
     .challenge-btn { flex-shrink: 0; }
 
@@ -133,23 +235,53 @@
     }
     .duel-btn:hover { background: var(--moss); }
 
+    .duel-btn:hover { 
+        background: var(--moss);
+     }
+
     /* ── Empty state ── */
-    .nearby-empty { padding: 32px 8px; text-align: center; }
-    .nearby-empty-icon { font-size: 28px; display: block; margin-bottom: 12px; opacity: 0.4; }
-    .nearby-empty-title { font-size: 13px; font-weight: 500; color: var(--text-dark); margin-bottom: 6px; }
-    .nearby-empty-sub   { font-size: 12px; color: var(--text-light); line-height: 1.65; }
+    .nearby-empty { 
+        padding: 32px 8px; 
+        text-align: center; 
+    }
+    .nearby-empty-icon { 
+        font-size: 28px; 
+        display: block; 
+        margin-bottom: 12px; 
+        opacity: 0.4; 
+    }
+
+    .nearby-empty-title { 
+        font-size: 13px; 
+        font-weight: 500; 
+        color: var(--text-dark); 
+        margin-bottom: 6px; 
+    }
+
+    .nearby-empty-sub   { 
+        font-size: 12px; 
+        color: var(--text-light); 
+        line-height: 1.65; 
+    }
 
     /* ── Toast (re-uses shared.css .toast, but duel toast is gold) ── */
     #duel-toast {
       position: fixed; bottom: 32px; left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: var(--bark); color: #fff;
-      padding: 13px 24px; border-radius: var(--r-md);
-      font-size: 13px; font-family: "DM Sans", sans-serif; font-weight: 500;
-      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      background: var(--bark); 
+      color: #fff;
+      padding: 13px 24px; 
+      border-radius: var(--r-md);
+      font-size: 13px; 
+      font-family: "DM Sans", sans-serif; 
+      font-weight: 500;
+      opacity: 0; 
+      transition: opacity 0.3s, transform 0.3s;
       pointer-events: none; z-index: 9999;
     }
+
     #duel-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   </style>
 </head>
 <body>
@@ -219,33 +351,23 @@
     ];
     function colourFor(name) { return COLOURS[name.charCodeAt(0) % COLOURS.length]; }
 
-    function makeIcon(initial, isYou, cp) {
-      const [c1, c2] = cp;
-      const gid = 'g' + Math.random().toString(36).slice(2, 8);
-      const ring = isYou ? `<circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"/>` : '';
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">
-        <defs>
-          <linearGradient id="${gid}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="${c1}"/>
-            <stop offset="100%" stop-color="${c2}"/>
-          </linearGradient>
-        </defs>
-        <!-- Circle body -->
-        <circle cx="18" cy="18" r="18" fill="url(#${gid})"/>
-        ${ring}
-        <!-- Initial -->
-        <text x="18" y="23" text-anchor="middle"
-              font-family="'Playfair Display',Georgia,serif"
-              font-size="14" font-weight="600" fill="white">${initial}</text>
-        <!-- Pointer nub -->
-        <polygon points="11,33 25,33 18,46" fill="${c2}"/>
-      </svg>`;
+    function makeIcon(uid, name, isYou) {
+      var faceSrc = (window.getFace ? window.getFace(uid || name) : 'faces/Human_face.png');
+      var ringStyle = isYou
+        ? 'outline:3px solid rgba(255,255,255,0.9);outline-offset:1px;box-shadow:0 2px 0 rgba(0,0,0,0.5);'
+        : 'box-shadow:0 2px 0 rgba(0,0,0,0.5);';
+      var html =
+        '<div style="display:flex;flex-direction:column;align-items:center;">' +
+          '<img src="' + faceSrc + '" width="36" height="36" ' +
+               'style="display:block;border-radius:2px;object-fit:cover;image-rendering:pixelated;' + ringStyle + '">' +
+          '<div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid rgba(0,0,0,0.75);margin-top:-1px;"></div>' +
+        '</div>';
       return L.divIcon({
         className: '',
-        html: svg,
-        iconSize:   [36, 46],
-        iconAnchor: [18, 46],
-        popupAnchor:[0, -50],
+        html: html,
+        iconSize:   [36, 45],
+        iconAnchor: [18, 45],
+        popupAnchor:[0, -48],
       });
     }
 
@@ -254,14 +376,13 @@
     function upsertMarker(uid, d, isYou, statusStr) {
       if (!d.lat || !d.lng) return;
       const name    = d.displayName || 'Student';
-      const initial = name.charAt(0).toUpperCase();
-      const cp      = colourFor(name);
+      const faceSrc = window.getFace ? window.getFace(uid || name) : 'faces/Human_face.png';
 
       // statusStr is computed by getStatusStr() in the module script below
       // and reflects the live running/phase state — no time elapsed calculation.
       const popupHTML = `
         <div class="pin-popup">
-          <div class="pin-popup-avatar" style="background:linear-gradient(135deg,${cp[0]},${cp[1]})">${initial}</div>
+          <img class="pin-popup-avatar" src="${faceSrc}" alt="${name}">
           <div>
             <div class="pin-popup-name">${name}${isYou ? ' <span style="color:#5d9e37">(you)</span>' : ''}</div>
             <div class="pin-popup-sub">${statusStr}</div>
@@ -271,10 +392,10 @@
 
       if (activeMarkers[uid]) {
         activeMarkers[uid].setLatLng([d.lat, d.lng]);
-        activeMarkers[uid].setIcon(makeIcon(initial, isYou, cp));
+        activeMarkers[uid].setIcon(makeIcon(uid, name, isYou));
         activeMarkers[uid].setPopupContent(popupHTML);
       } else {
-        activeMarkers[uid] = L.marker([d.lat, d.lng], { icon: makeIcon(initial, isYou, cp) })
+        activeMarkers[uid] = L.marker([d.lat, d.lng], { icon: makeIcon(uid, name, isYou) })
           .addTo(map)
           .bindPopup(popupHTML, { maxWidth: 320 });
       }
@@ -284,8 +405,7 @@
       if (activeMarkers[uid]) { map.removeLayer(activeMarkers[uid]); delete activeMarkers[uid]; }
     }
 
-    // sendDuel is populated by the module script once auth + db are ready.
-    // Falls back to a toast-only stub if the module hasn't loaded yet.
+
     window.sendDuel = function(uid, name) {
       const t = document.getElementById('duel-toast');
       t.textContent = `⚔  Duel request sent to ${name}`;
@@ -311,7 +431,7 @@
     let currentUserName  = null;
     let allSessions      = new Map();   // uid → activeSessions data
 
-    // ── Duel toast helper ───────────────────────────────────────────
+    // ── Duel toast helper ───
     function showDuelToast(msg) {
       const t = document.getElementById('duel-toast');
       t.textContent = msg;
@@ -320,8 +440,7 @@
     }
 
     // ── sendDuel — overrides the stub set in the non-module script ──
-    // Called from inline onclick in both the sidebar and map popups.
-    // Checks one-at-a-time constraint, then redirects to the timer once accepted.
+  
     window.sendDuel = async function(toUid, toName) {
       if (!currentUid) { showDuelToast("Sign in to send a duel request."); return; }
       try {
@@ -369,13 +488,12 @@
     function getStatusStr(d) {
       if (d.running && d.phase === "work")  return `Studying${d.subject ? " · " + d.subject : ""}`;
       if (d.running && d.phase === "break") return "On a break 🌿";
-      if (d.running === false)              return "Paused";
+      if (d.running === false)return "Paused";
       return "In a session";
     }
 
     // ── Re-render map and sidebar from current state ────────────────
-    // Called by both listeners so either a friends change or a session
-    // change triggers a consistent re-render.
+
     function renderMap() {
       const liveUids = new Set(allSessions.keys());
       document.getElementById("studying-count").textContent = liveUids.size;
@@ -394,22 +512,18 @@
         return;
       }
 
-      const COLOURS = [['#5a8a5e','#2e5232'],['#4a7a9a','#1e4a6a'],['#8B6F47','#4a3018'],['#7a6aaa','#3a2a7a'],['#aa6a5a','#6a2a1a']];
-      const colourFor = n => COLOURS[n.charCodeAt(0) % COLOURS.length];
-
       let html = "";
       allSessions.forEach((d, uid) => {
-        const isYou   = uid === currentUid;
-        const name    = d.displayName || "Student";
-        const initial = name.charAt(0).toUpperCase();
-        const cp      = colourFor(name);
-        const status  = getStatusStr(d);
+        const isYou  = uid === currentUid;
+        const name   = d.displayName || "Student";
+        const face   = window.getFace ? window.getFace(uid || name) : 'faces/Human_face.png';
+        const status = getStatusStr(d);
 
         upsertMarker(uid, d, isYou, status);
 
         html += `<div class="nearby-item" data-uid="${uid}">
           <div class="nearby-top">
-            <div class="nearby-avatar" style="background:linear-gradient(135deg,${cp[0]},${cp[1]})">${initial}</div>
+            <img class="nearby-avatar mc-avatar" src="${face}" alt="${name}" width="36" height="36">
             <div class="nearby-info">
               <div class="nearby-name">${name}${isYou ? ' <span style="color:#5d9e37">(you)</span>' : ''}</div>
               <div class="nearby-subject">${status}</div>
@@ -425,25 +539,23 @@
     }
 
     // ── Auth: start both listeners once logged in ───────────────────
-    // IMPORTANT: this page does NOT write to activeSessions.
-    // Presence is managed entirely by index.html — navigating here will
-    // NOT add or remove your pin from anyone's map.
+
     onAuthStateChanged(auth, user => {
       if (!user) { window.location.href = "login.html"; return; }
       currentUid      = user.uid;
       currentUserName = user.displayName || user.email.split("@")[0];
 
-      const name    = currentUserName;
+      const name   = currentUserName;
       const initial = name.charAt(0).toUpperCase();
+      const myFace = window.getFace ? window.getFace(currentUid) : '';
       document.getElementById("nav-right").innerHTML = `
         <a href="dashboard.html" class="nav-user-pill">
-          <div class="nav-user-dot">${initial}</div>
+          <img src="${myFace}" class="nav-user-dot" alt="${initial}" style="width:28px;height:28px;object-fit:cover;image-rendering:pixelated;border-radius:2px;">
           <span>${name.split(" ")[0]}</span>
         </a>`;
 
       // Single listener: all active sessions — everyone is visible.
       // Sessions without a lastUpdated stamp, or older than 4 hours, are stale
-      // (browser closed without restarting) and filtered out client-side.
       const STALE_MS = 4 * 60 * 60 * 1000;
       onSnapshot(collection(db, "activeSessions"), snap => {
         allSessions.clear();

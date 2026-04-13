@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kill My Assignments — Leaderboard</title>
-  
+ 
   <link rel="stylesheet" href="shared.css">
+  <script src="face-utils.js"></script>
+  <script src="audio.js"></script>
   <style>
     .lb-page {
       min-height: calc(100vh - 47px);
@@ -15,20 +17,46 @@
       grid-template-columns: 1fr 320px;
       gap: 24px;
     }
-    .page-title { font-family:"Playfair Display",serif; font-size:24px; font-weight:500; color:var(--text-dark); margin-bottom:24px; }
+    .page-title { 
+     font-family:"DM Sans",sans-serif;
+     font-size:24px; 
+     font-weight:700; 
+     color:var(--text-dark); margin-bottom:24px; 
+    }
 
     /* ── Empty state ── */
     .empty-state {
-      background: var(--white); border: 1px solid var(--stone-light);
-      border-radius: var(--r-md); padding: 56px 24px;
-      text-align: center; box-shadow: var(--shadow-sm);
+      background: var(--white); 
+      border: 1px solid var(--stone-light);
+      border-radius: var(--r-md); 
+      padding: 56px 24px;
+      text-align: center;
+       box-shadow: var(--shadow-sm);
     }
-    .empty-icon  { font-size: 40px; margin-bottom: 14px; }
-    .empty-title { font-family:"Playfair Display",serif; font-size:20px; color:var(--text-dark); margin-bottom:8px; }
-    .empty-sub   { font-size:13px; color:var(--text-light); line-height:1.6; margin-bottom:20px; }
+    .empty-icon  { 
+      font-size: 40px; 
+      margin-bottom: 14px; 
+    }
+    .empty-title { 
+      font-family:"DM Sans",sans-serif;
+      font-size:20px; font-weight:700; 
+      color:var(--text-dark); margin-bottom:8px;
+      }
+    .empty-sub   { 
+      font-size:13px; 
+      color:var(--text-light); 
+      line-height:1.6; 
+      margin-bottom:20px; 
+    }
 
-    /* ── Leaderboard table (shown once populated) ── */
-    .lb-table { background:var(--white); border-radius:var(--r-md); overflow:hidden; border:1px solid var(--stone-light); box-shadow:var(--shadow-sm); }
+    /*Leaderboard table  */
+    .lb-table { 
+       background:var(--white);
+       border-radius:var(--r-md); 
+       overflow:hidden; 
+       border:1px solid var(--stone-light); 
+       box-shadow:var(--shadow-sm); 
+      }
     .lb-header {
       display:grid; grid-template-columns:36px 1fr 90px 90px 80px;
       padding:12px 20px; background:var(--cream-dark);
@@ -37,82 +65,233 @@
       letter-spacing:0.5px; text-transform:uppercase;
     }
     .lb-row {
-      display:grid; grid-template-columns:36px 1fr 90px 90px 80px;
-      padding:12px 20px; border-bottom:1px solid var(--cream-dark);
-      align-items:center; transition:background 0.15s;
+      display:grid; 
+      grid-template-columns:36px 1fr 90px 90px 80px;
+      padding:12px 20px; 
+      border-bottom:1px solid var(--cream-dark);
+      align-items:center; 
+      transition:background 0.15s;
     }
-    .lb-row:last-child { border-bottom:none; }
-    .lb-row:hover  { background:var(--sage-light); }
-    .lb-row.mine   { background:var(--sage-light); }  /* current user's row */
-    .lb-rank       { font-family:"Playfair Display",serif; font-size:15px; color:var(--text-light); }
-    .lb-user       { display:flex; align-items:center; gap:10px; }
-    .lb-avatar     { width:30px; height:30px; font-size:11px; }
-    .lb-username   { font-size:13px; font-weight:500; color:var(--text-dark); }
-    .lb-you-tag    { font-size:10px; color:var(--sage-deep); background:var(--sage-light); padding:2px 7px; border-radius:99px; margin-left:6px; }
-    .lb-cell       { font-size:13px; color:var(--text-mid); text-align:right; }
-    .lb-cell.score { color:var(--sage-deep); font-weight:500; }
+    .lb-row:last-child { 
+      border-bottom:none;
+     }
+    .lb-row:hover  { 
+      background:var(--sage-light);
+     }
+    .lb-row.mine   { 
+      background:var(--sage-light);
+     }  /* current user's row */
+    .lb-rank       { 
+      font-family:"DM Sans",sans-serif;
+     font-size:15px;
+      font-weight:700;
+      color:var(--text-light); 
+    }
+    .lb-user       { 
+      display:flex;
+      align-items:center;
+      gap:10px; 
+    }
+    .lb-avatar     { 
+      width:30px;
+      height:30px;
+      font-size:11px;
+     }
+    .lb-username   { 
+      font-size:13px;
+      font-weight:500; 
+      color:var(--text-dark); 
+    }
+    .lb-you-tag    { 
+      font-size:10px;
+      color:var(--sage-deep);
+      background:var(--sage-light);
+      padding:2px 7px;
+      border-radius:99px;
+      margin-left:6px;
+     }
+    .lb-cell       {
+       font-size:13px;
+       color:var(--text-mid);
+       text-align:right;
+       }
+    .lb-cell.score { 
+      color:var(--sage-deep);
+       font-weight:500;
+     }
 
-    /* ── Right column ── */
-    .duel-card { background:linear-gradient(135deg,var(--sage-deep),var(--moss)); border-radius:var(--r-md); padding:24px; margin-bottom:20px; color:#fff; }
-    .duel-title { font-family:"Playfair Display",serif; font-size:18px; margin-bottom:6px; }
-    .duel-sub   { font-size:12px; opacity:0.75; margin-bottom:20px; line-height:1.6; }
-    .duel-vs { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:20px; }
-    .duel-player { text-align:center; }
-    .duel-player-av { width:44px; height:44px; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; border:2px solid rgba(255,255,255,0.5); }
-    .duel-player-name { font-size:11px; opacity:0.85; }
-    .vs-badge { font-family:"Playfair Display",serif; font-size:20px; opacity:0.6; }
-    .btn-challenge { width:100%; padding:11px; background:rgba(255,255,255,0.2); border:1.5px solid rgba(255,255,255,0.4); border-radius:var(--r-sm); color:#fff; font-size:13px; font-weight:500; cursor:pointer; font-family:"DM Sans",sans-serif; transition:background 0.2s; }
-    .btn-challenge:hover { background:rgba(255,255,255,0.3); }
+    /*  Right column  */
+    .duel-card { 
+      background:linear-gradient(135deg,var(--sage-deep),var(--moss)); 
+      border-radius:var(--r-md); 
+      padding:24px; 
+      margin-bottom:20px; 
+      color:#fff; 
+    }
+    .duel-title { 
+      font-family:"DM Sans",sans-serif;
+      font-size:18px;
+      font-weight:700;
+      margin-bottom:6px;
+      }
+    .duel-sub   { 
+      font-size:12px;
+      opacity:0.75; 
+      margin-bottom:20px; 
+      line-height:1.6; 
+    }
+    .duel-vs { 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      gap:16px; 
+      margin-bottom:20px; 
+    }
+    .duel-player { 
+      text-align:center;
+     }
+    .duel-player-av { 
+      width:44px; 
+      height:44px; 
+      border-radius:2px; 
+      margin:0 auto 6px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-size:16px; 
+      font-weight:600; 
+      border:2px solid rgba(255,255,255,0.5); 
+      overflow:hidden; 
+      image-rendering:pixelated; }
+    .duel-player-name { 
+      font-size:11px; 
+      opacity:0.85; 
+    }
+    .vs-badge { 
+      font-family:"Press Start 2P", monospace; 
+    font-size:16px; 
+    opacity:0.7; 
+  }
+    .btn-challenge { 
+      width:100%; 
+      padding:11px; 
+      background:rgba(255,255,255,0.2); 
+      border:1.5px solid rgba(255,255,255,0.4); 
+      border-radius:var(--r-sm); 
+      color:#fff; font-size:13px; 
+      font-weight:500; 
+      cursor:pointer; 
+      font-family:"DM Sans",sans-serif; 
+      transition:background 0.2s; 
+    }
+    .btn-challenge:hover { 
+      background:rgba(255,255,255,0.3); 
+    }
 
-    .badges-wrap { background:var(--white); border-radius:var(--r-md); padding:20px 22px; border:1px solid var(--stone-light); box-shadow:var(--shadow-sm); }
-    .badge-grid  { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
-    .badge-item  { display:flex; flex-direction:column; align-items:center; gap:5px; }
-    .badge-icon  { width:42px; height:42px; border-radius:10px; background:var(--sage-light); display:flex; align-items:center; justify-content:center; font-size:20px; }
-    .badge-icon.locked { opacity:0.3; filter:grayscale(1); }
-    .badge-name  { font-size:10px; color:var(--text-light); text-align:center; }
+    .badges-wrap { 
+      background:var(--white); 
+      border-radius:var(--r-md); 
+      padding:20px 22px; 
+      border:1px solid var(--stone-light); 
+      box-shadow:var(--shadow-sm); 
+    }
+    .badge-grid  { 
+      display:grid; 
+      grid-template-columns:repeat(4,1fr); 
+      gap:10px; 
+      margin-top:12px; 
+    }
+    .badge-item  { 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center;
+      gap:5px; 
+    }
+    .badge-icon  { 
+      width:42px; 
+      height:42px; 
+      border-radius:10px; 
+      background:var(--sage-light); 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      font-size:20px; 
+    }
+    .badge-icon.locked { 
+      opacity:0.3; 
+      filter:grayscale(1); 
+    }
+    .badge-name  { 
+      font-size:10px; 
+      color:var(--text-light); 
+      text-align:center; 
+    }
 
     /* Loading spinner */
-    .loading-text { text-align:center; padding:32px; font-size:13px; color:var(--text-light); }
+    .loading-text { 
+      text-align:center; 
+      padding:32px; 
+      font-size:13px; 
+      color:var(--text-light); 
+    }
 
-    /* ── Online presence dot ── */
+    /*  Online presence dot  */
     .online-dot-lb {
       display: inline-block; width: 8px; height: 8px; border-radius: 50%;
       background: var(--stone-light); flex-shrink: 0; margin-right: 4px;
       transition: background 0.3s, box-shadow 0.3s;
     }
-    .online-dot-lb.on { background: #68C76A; box-shadow: 0 0 5px rgba(104,199,106,0.55); }
+    .online-dot-lb.on { 
+      background: #68C76A; 
+      box-shadow: 0 0 5px rgba(104,199,106,0.55); 
+    }
 
-    /* ── Duel button on leaderboard rows ── */
+    /* Duel button on leaderboard rows */
     .lb-duel-btn {
-      font-size: 10px; padding: 3px 10px; border-radius: 99px;
-      border: 1.5px solid var(--sage-deep); color: var(--sage-deep);
-      background: transparent; cursor: pointer;
-      font-family: "DM Sans",sans-serif; font-weight: 500;
-      transition: all 0.15s; white-space: nowrap;
+      font-size: 10px; 
+      padding: 3px 10px; 
+      border-radius: 99px;
+      border: 1.5px solid var(--sage-deep); 
+      color: var(--sage-deep);
+      background: transparent; 
+      cursor: pointer;
+      font-family: "DM Sans",sans-serif; 
+      font-weight: 500;
+      transition: all 0.15s; 
+      white-space: nowrap;
+    }
+    .lb-duel-btn:hover { 
+      background: var(--sage-deep); 
+      color: #fff; 
     }
     .lb-duel-btn:hover { background: var(--sage-deep); color: #fff; }
 
     /* Full-page background image */
     .lb-bg {
-      position: fixed; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: center;
-      z-index: 0; opacity: 0.40; pointer-events: none;
+      position: fixed; 
+      inset: 0;
+      width: 100%; 
+      height: 100%;
+      object-fit: cover; 
+      object-position: center;
+      z-index: 0; opacity: 0.40; 
+      pointer-events: none;
     }
     /* Lift all page content above the background */
-    .lb-page { position: relative; z-index: 1; }
+    .lb-page { 
+      position: relative; 
+      z-index: 1;
+     }
   </style>
 </head>
 <body>
 
-  <!-- Background image — 40% opacity over cream so the page stays readable -->
+  <!-- Background image  -->
   <img class="lb-bg"
     src="minecraft_rails.png"
     alt="">
 
-  <!-- ══════════════════════════════════════════════════════
-       NAV
-  ══════════════════════════════════════════════════════ -->
+  <!-- NAV -->
   <nav class="nav">
     <div class="nav-left">
       <a class="nav-logo" href="index.html">Kill My <span>Assignments</span></a>
@@ -128,12 +307,10 @@
     </div>
   </nav>
 
-  <!-- ══════════════════════════════════════════════════════
-       LEADERBOARD PAGE
-  ══════════════════════════════════════════════════════ -->
+  <!-- LEADERBOARD PAGE -->
   <div class="lb-page">
 
-    <!-- Left: table -->
+    <!-- table -->
     <div>
       <div class="page-title">All-time leaderboard</div>
 
@@ -145,9 +322,8 @@
 
       <!--
         Table is empty on load. The Firebase script below fetches real scores
-        from Firestore and builds this list dynamically.
-        The empty-state div is shown until at least one score exists.
-      -->
+        from Firestore and builds this list dynamically. 
+        -->
       <div id="lb-content">
         <div class="loading-text">Loading scores…</div>
       </div>
@@ -161,7 +337,7 @@
         <div class="duel-sub">Challenge anyone on the map. First to quit loses their session progress.</div>
         <div class="duel-vs">
           <div class="duel-player">
-            <div class="duel-player-av" id="duel-avatar" style="background:rgba(255,255,255,0.2)">?</div>
+            <img id="duel-avatar" class="duel-player-av" src="" alt="You" style="width:44px;height:44px;object-fit:cover;image-rendering:pixelated;">
             <div class="duel-player-name" id="duel-name">You</div>
           </div>
           <div class="vs-badge">vs</div>
@@ -170,10 +346,7 @@
             <div class="duel-player-name">Anyone</div>
           </div>
         </div>
-        <!--
-          TODO: clicking this should navigate to map.html so the user can
-          pick an opponent. Write the duel request to Firestore "duels" collection.
-        -->
+        
         <button class="btn-challenge" onclick="window.location.href='map.html'">⚔ Challenge someone on the map</button>
       </div>
 
@@ -199,9 +372,7 @@
   <!-- Toast -->
   <div class="toast" id="lb-toast"></div>
 
-  <!-- ══════════════════════════════════════════════════════
-       FIREBASE — auth guard + leaderboard + duels + badges
-  ══════════════════════════════════════════════════════ -->
+  <!-- FIREBASE — auth guard + leaderboard + duels + badges -->
   <script type="module">
     import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged }
@@ -217,7 +388,7 @@
 
     const DUEL_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
-    // ── Toast ──────────────────────────────────────────────────────
+    // Toast 
     function showToast(msg, type = "success") {
       const t = document.getElementById("lb-toast");
       t.textContent = msg;
@@ -225,7 +396,7 @@
       setTimeout(() => t.classList.remove("show"), 3500);
     }
 
-    // ── Badges ─────────────────────────────────────────────────────
+    // Badges 
     function renderBadges(data, myRank) {
       const badges = [
         { icon: "🌱", name: "First session", earned: (data.totalSessions || 0) >= 1,  how: "Complete your first work session" },
@@ -244,22 +415,24 @@
         </div>`).join("");
     }
 
-    // ── Auth guard + data loading ──────────────────────────────────
+    // Auth guard + data loading
     onAuthStateChanged(auth, async user => {
       if (!user) { window.location.href = "login.html"; return; }
 
       const name    = user.displayName || user.email.split("@")[0];
       const initial = name.charAt(0).toUpperCase();
+      const myFace = window.getFace ? window.getFace(user.uid) : '';
       document.getElementById("nav-right").innerHTML = `
         <a href="dashboard.html" class="nav-user-pill">
-          <div class="nav-user-dot">${initial}</div>
+          <img src="${myFace}" class="nav-user-dot" alt="${initial}" style="width:28px;height:28px;object-fit:cover;image-rendering:pixelated;border-radius:2px;">
           <span>${name.split(" ")[0]}</span>
         </a>`;
-      document.getElementById("duel-avatar").textContent = initial;
-      document.getElementById("duel-name").textContent   = name.split(" ")[0];
+      const duelAv = document.getElementById("duel-avatar");
+      if (duelAv) duelAv.src = myFace;
+      document.getElementById("duel-name").textContent = name.split(" ")[0];
 
-      // ── Duel sender — window.* so inline onclick can call it ──────
-      // Checks one-at-a-time constraint before writing to Firestore.
+      //  Duel sender
+      
       window.sendDuelFromLB = async function(toUid, toName) {
         try {
           // Check if user is already in an active or pending duel
@@ -324,9 +497,8 @@
         });
       });
 
-      // ── Fetch ALL users, sort client-side ─────────────────────────
-      // Using orderBy("allTimeScore") would exclude users without that field
-      // (added mid-project). Client-side sort handles both old and new users.
+      // Fetch ALL users, sort client-side
+  
       try {
         const usersSnap = await getDocs(collection(db, "users"));
         const content   = document.getElementById("lb-content");
@@ -343,7 +515,7 @@
           return;
         }
 
-        // Sort by allTimeScore, fall back to weeklyScore for users without it
+        // Sort by allTimeScore
         const allUsers = [];
         usersSnap.forEach(d => allUsers.push({ id: d.id, ...d.data() }));
         allUsers.sort((a, b) =>
@@ -366,7 +538,7 @@
           const score = (d.allTimeScore || d.weeklyScore || 0).toLocaleString();
           const sess  = d.totalSessions || 0;
           const hours = (d.totalHours   || 0).toFixed(2);
-          const bg    = colours[dName.charCodeAt(0) % colours.length];
+          const face  = window.getFace ? window.getFace(uid) : '';
 
           const duelBtn = !isMe
             ? `<button class="lb-duel-btn" data-duel-uid="${uid}"
@@ -378,7 +550,7 @@
               <div class="lb-rank">${rank}</div>
               <div class="lb-user">
                 <span class="online-dot-lb" data-uid="${uid}"></span>
-                <div class="avatar lb-avatar" style="background:linear-gradient(135deg,${bg})">${dInit}</div>
+                <img class="mc-avatar lb-avatar" src="${face}" width="30" height="30" alt="${dInit}" style="border-radius:2px;object-fit:cover;image-rendering:pixelated;flex-shrink:0;">
                 <div>
                   <div class="lb-username">${dName}${isMe ? '<span class="lb-you-tag">you</span>' : ""}</div>
                   ${duelBtn ? `<div style="margin-top:4px">${duelBtn}</div>` : ""}
