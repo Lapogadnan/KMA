@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kill My Assignments — About Us</title>
+  
+  <link rel="stylesheet" href="shared.css">
+  <script src="audio.js"></script>
+  <style>
+    
+    .about-page { 
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 56px 24px 80px; 
+    }
+
+    
+    .about-hero {
+      position: relative; 
+      overflow: hidden;
+      min-height: 320px; 
+      display: flex; 
+      align-items: flex-end;
+      border-radius: var(--r-lg); 
+      margin-bottom: 56px;
+    }
+    .about-hero-img {
+      position: absolute; 
+      inset: 0;
+      width: 100%; 
+      height: 100%;
+      object-fit: cover; 
+      object-position: center;
+    }
+    .about-hero-overlay {
+      position: absolute; 
+      inset: 0;
+      background: linear-gradient(to top, rgba(10,22,12,0.85) 0%, rgba(10,22,12,0.3) 60%, transparent 100%);
+    }
+    .about-hero-content { 
+      position: relative; 
+      z-index: 2; 
+      padding: 36px 40px; 
+    }
+    .about-eyebrow { 
+      font-size: 11px; 
+      text-transform: uppercase;
+      letter-spacing: 1.5px; 
+      color: var(--gold); 
+      font-weight: 500; 
+      margin-bottom: 10px; 
+    }
+    .about-hero-title { 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 38px; 
+      font-weight: 700; 
+      color: #fff; 
+      line-height: 1.15; 
+      letter-spacing: -0.5px; 
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4); 
+    }
+    .about-hero-sub { 
+      font-size: 15px; 
+      color: rgba(255,255,255,0.75);
+      margin-top: 10px; 
+      line-height: 1.6;
+      max-width: 460px; 
+    }
+
+    
+    .section-heading { 
+     font-family: "DM Sans",sans-serif; 
+     font-size: 22px; 
+     font-weight: 700; 
+     color: var(--text-dark); 
+     margin-bottom: 8px; 
+    }
+    .section-sub { 
+      font-size: 14px; 
+      color: var(--text-light); 
+      line-height: 1.65; 
+      margin-bottom: 28px; 
+    }
+
+    
+    .team-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); 
+      gap: 16px; 
+      margin-bottom: 56px; 
+    }
+    .team-card {
+      background: var(--white); 
+      border: 1px solid var(--stone-light);
+      border-radius: var(--r-md); 
+      padding: 24px 20px;
+      box-shadow: var(--shadow-sm); 
+      text-align: center;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .team-card:hover { 
+      box-shadow: var(--shadow-md); 
+      transform: translateY(-2px); 
+    }
+    .team-avatar-wrap { 
+      display: flex; 
+      justify-content: center; 
+      margin-bottom: 14px; 
+    }
+    .team-avatar {
+      width: 60px; 
+      height: 60px; 
+      border-radius: 50%;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-family: "DM Sans",sans-serif; 
+      font-size: 24px; 
+      font-weight: 700; 
+      color: #fff;
+    }
+    .team-name { 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: var(--text-dark);
+      margin-bottom: 4px; 
+    }
+    .team-role { font-size: 11px; 
+      color: var(--sage-deep); 
+      font-weight: 500; 
+      text-transform: uppercase; 
+      letter-spacing: 0.6px; 
+      margin-bottom: 10px; 
+    }
+    .team-desc { 
+      font-size: 12.5px; 
+      color: var(--text-light); 
+      line-height: 1.55; 
+    }
+
+    
+    .two-col { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 18px; 
+      margin-bottom: 40px; 
+    }
+    .info-card { background: var(--white); 
+      border: 1px solid var(--stone-light); 
+      border-radius: var(--r-md); 
+      padding: 24px; 
+      box-shadow: var(--shadow-sm); 
+    }
+    .info-card-icon { 
+      font-size: 28px; 
+      margin-bottom: 12px; 
+    }
+    .info-card-title { 
+    font-family: "DM Sans",sans-serif; 
+    font-size: 16px;
+    font-weight: 700; 
+    color: var(--text-dark); 
+    margin-bottom: 8px;
+   }
+    .info-card-text { 
+      font-size: 13px; 
+      color: var(--text-light); 
+      line-height: 1.65; 
+    }
+
+    
+    .tech-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-bottom: 56px; 
+      font-size: 13px; 
+    }
+    .tech-table th { 
+      text-align: left; 
+      font-size: 11px; 
+      font-weight: 500; 
+      color: var(--text-light); 
+      letter-spacing: 0.5px; 
+      text-transform: uppercase; 
+      padding: 8px 16px; 
+      background: var(--cream-dark); 
+      border-bottom: 1px solid var(--stone-light); 
+    }
+    .tech-table td { 
+      padding: 12px 16px; 
+      border-bottom: 1px solid var(--cream-dark); 
+      color: var(--text-mid); 
+      vertical-align: top; 
+    }
+    .tech-table tr:last-child td { 
+      border-bottom: none; 
+    }
+    .tech-table tr:hover td {
+      background: var(--sage-light); 
+    }
+    .tech-name { 
+      font-weight: 500; 
+      color: var(--text-dark); 
+    }
+    .tech-wrap { 
+      background: var(--white); 
+      border: 1px solid var(--stone-light); 
+      border-radius: var(--r-md); 
+      overflow: hidden; 
+      box-shadow: var(--shadow-sm); 
+      margin-bottom: 56px; 
+    }
+
+    
+    .about-cta { 
+      background: var(--sage-deep); 
+      border-radius: var(--r-lg); 
+      padding: 48px; 
+      text-align: center; 
+      color: #fff; 
+    }
+    .about-cta-title { 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 28px; 
+      font-weight: 700; 
+      margin-bottom: 10px; 
+    }
+    .about-cta-sub { 
+      font-size: 14px; 
+      opacity: 0.75; 
+      margin-bottom: 24px; 
+      line-height: 1.6; 
+    }
+    .btn-cream { 
+      display: inline-block; 
+      padding: 13px 28px; 
+      background: var(--cream); 
+      color: var(--sage-deep); 
+      border: none; 
+      border-radius: var(--r-sm); 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 14px; 
+      font-weight: 500; 
+      text-decoration: none; 
+      cursor: pointer; 
+      transition: background 0.2s; 
+    }
+    .btn-cream:hover { 
+      background: var(--white); 
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-left">
+      <a class="nav-logo" href="index.html">Kill My <span>Assignments</span></a>
+      <div class="nav-tabs">
+        <a class="nav-tab" href="index.html">Timer</a>
+        <a class="nav-tab" href="leaderboard.html">Leaderboard</a>
+        <a class="nav-tab" href="map.html">Study map</a>
+        <a class="nav-tab active" href="about-us.html">About</a>
+      </div>
+    </div>
+    <div class="nav-right" id="nav-right">
+      <a href="login.html" class="nav-login-btn">Sign in</a>
+    </div>
+  </nav>
+
+  <div class="about-page">
+
+    <div class="about-hero">
+      <img class="about-hero-img"
+        src="download_20.jpg"
+        alt="Study scene">
+      <div class="about-hero-overlay"></div>
+      <div class="about-hero-content">
+        <div class="about-hero-title">Kill My Assignments</div>
+        <div class="about-hero-sub">A focus-first study companion built for students who need more than just a timer.</div>
+      </div>
+    </div>
+
+    
+    <div class="section-heading">What we built &amp; why</div>
+    <div class="section-sub">Distraction is the number one enemy of student productivity. We set out to build something that fights back.</div>
+
+    <div class="two-col" style="margin-bottom: 56px;">
+      <div class="info-card">
+        <div class="info-card-icon"></div>
+        <div class="info-card-title">The Problem</div>
+        <div class="info-card-text">Students with attention disorders struggle more than neurotypical students to lock in during exam time. These students deserve the same opportunities to succeed.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon"></div>
+        <div class="info-card-title">The Solution</div>
+        <div class="info-card-text">Kill My Assignments adds random check-in popups that you must click or all your progress is lost!. You can't fake presence. Every completed cycle earns points, so studying becomes a game you want to win.</div>
+      </div>
+    </div>
+
+    
+   
+<div class="about-cta" style="position: relative; overflow: hidden;">
+  <img style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0;"
+    src="fox.png"
+    alt="Study background">
+  <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,22,12,0.85) 0%, rgba(10,22,12,0.55) 60%, rgba(10,22,12,0.3) 100%); z-index: 1;"></div>
+  <div style="position: relative; z-index: 2;">
+    <div class="about-cta-title">Want to try it?</div>
+    <div class="about-cta-sub">Open the timer — no account needed to start. Sign in when you're ready to compete.</div>
+    <a href="index.html" class="btn-cream">Open the timer &rarr;</a>
+  </div>
+</div>
+
+  </div>
+
+
+  <script type="module">
+    import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged }
+                                   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { firebaseConfig }      from "./firebase-config.js";
+
+    const auth = getAuth(initializeApp(firebaseConfig));
+
+    // Swap Sign In button for user pill when logged in
+    onAuthStateChanged(auth, user => {
+      if (!user) return;
+      const name    = user.displayName || user.email.split("@")[0];
+      const initial = name.charAt(0).toUpperCase();
+      document.getElementById("nav-right").innerHTML = `
+        <a href="dashboard.html" class="nav-user-pill">
+          <div class="nav-user-dot">${initial}</div>
+          <span>${name.split(" ")[0]}</span>
+        </a>`;
+    });
+  </script>
+</body>
+</html>

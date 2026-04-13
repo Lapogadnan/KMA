@@ -33,9 +33,9 @@
 
     /* ── Leaflet zoom controls — site style ── */
     .leaflet-bar {
-      border-radius: var(--r-sm);
-      border: 1px solid var(--stone-light);
-      box-shadow: var(--shadow-sm);
+      border-radius: var(--r-sm) !important;
+      border: 1px solid var(--stone-light) !important;
+      box-shadow: var(--shadow-sm) !important;
       overflow: hidden;
     }
     .leaflet-control-zoom a {
@@ -69,13 +69,12 @@
     .leaflet-popup-content { margin: 0; 
         width: auto; 
     }
+    .leaflet-popup-tip { background: var(--white) !important; }
+    .leaflet-popup-content { margin: 0 !important; width: auto !important; }
 
     .pin-popup {
-      display: flex; 
-      align-items: center; 
-      gap: 12px;
-      padding: 14px 16px; 
-      min-width: 230px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; min-width: 230px;
     }
 
     .pin-popup-avatar {
@@ -87,6 +86,9 @@
       object-fit: cover; 
       image-rendering: pixelated;
     }
+    .pin-popup-name { font-size: 13px; font-weight: 500; color: var(--text-dark); line-height: 1.3; }
+    .pin-popup-sub  { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+    .pin-popup-duel { margin-left: auto; }
 
     .pin-popup-name { 
         font-size: 13px; 
@@ -114,23 +116,16 @@
       flex-direction: column; 
       overflow: hidden;
     }
-
     .map-panel-header {
       background: var(--cream-dark);
       border-bottom: 1px solid var(--stone-light);
       padding: 22px 20px 18px;
       flex-shrink: 0;
     }
-
     .map-panel-title {
-      font-size: 10px; 
-      font-weight: 500; 
-      color: var(--text-light);
-      letter-spacing: 0.8px; 
-      text-transform: uppercase; 
-      margin-bottom: 8px;
+      font-size: 10px; font-weight: 500; color: var(--text-light);
+      letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 8px;
     }
-
     .map-count {
     font-family: "Press Start 2P", monospace;
     font-size: 22px; 
@@ -139,6 +134,7 @@
     line-height: 1.25;
      margin-bottom: 6px;
     }
+    .map-count-sub { font-size: 12px; color: var(--text-light); }
 
     .map-count-sub { 
         font-size: 12px; 
@@ -166,12 +162,8 @@
 
 
     .map-section-label {
-      font-size: 10px; 
-      font-weight: 500; 
-      color: var(--text-light);
-      letter-spacing: 0.8px; 
-      text-transform: uppercase; 
-      margin-bottom: 12px;
+      font-size: 10px; font-weight: 500; color: var(--text-light);
+      letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px;
     }
 
     /* ── Nearby list items ── */
@@ -210,12 +202,8 @@
     }
 
     .nearby-name {
-      font-size: 13px; 
-      font-weight: 500; 
-      color: var(--text-dark);
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis;
+      font-size: 13px; font-weight: 500; color: var(--text-dark);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     .nearby-subject { 
@@ -237,20 +225,15 @@
     .challenge-btn { 
         flex-shrink: 0; 
     }
+    .challenge-btn { flex-shrink: 0; }
 
     /* ── Duel button ── */
     .duel-btn {
-      padding: 5px 12px; 
-      background: var(--sage-deep); 
-      color: #fff;
-      border: none; 
-      border-radius: var(--r-sm); 
-      font-size: 11px; 
-      font-weight: 500;
-      font-family: "DM Sans",sans-serif; 
-      cursor: pointer; 
-      transition: background 0.15s;
+      padding: 5px 12px; background: var(--sage-deep); color: #fff;
+      border: none; border-radius: var(--r-sm); font-size: 11px; font-weight: 500;
+      font-family: "DM Sans",sans-serif; cursor: pointer; transition: background 0.15s;
     }
+    .duel-btn:hover { background: var(--moss); }
 
     .duel-btn:hover { 
         background: var(--moss);
@@ -283,9 +266,7 @@
 
     /* ── Toast (re-uses shared.css .toast, but duel toast is gold) ── */
     #duel-toast {
-      position: fixed; 
-      bottom: 32px; 
-      left: 50%;
+      position: fixed; bottom: 32px; left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: var(--bark); 
       color: #fff;
@@ -353,6 +334,7 @@
       zoomControl: false,
     });
 
+    // CartoDB Voyager — free, no key, great colours
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
       subdomains: 'abcd', maxZoom: 19,
@@ -396,6 +378,8 @@
       const name    = d.displayName || 'Student';
       const faceSrc = window.getFace ? window.getFace(uid || name) : 'faces/Human_face.png';
 
+      // statusStr is computed by getStatusStr() in the module script below
+      // and reflects the live running/phase state — no time elapsed calculation.
       const popupHTML = `
         <div class="pin-popup">
           <img class="pin-popup-avatar" src="${faceSrc}" alt="${name}">

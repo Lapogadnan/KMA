@@ -1,0 +1,523 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;500;700&display=swap');
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --sage:        #5a7a5c;
+  --sage-mid:    #4a6a4c;
+  --sage-deep:   #354f37;
+  --sage-light:  #e8f0e8;
+  --cream:       #f7f4ef;
+  --cream-dark:  #ede9e1;
+  --cream-deep:  #e0d9ce;
+  --stone-light: #ddd8d0;
+  --stone:       #a09890;
+  --stone-mid:   #7a7068;
+  --bark:        #3d3028;
+  --white:       #fdfcfa;
+  --text-dark:   #1e1a16;
+  --text-mid:    #5a5248;
+  --text-light:  #8a8078;
+  --gold:        #c8a96e;
+  --gold-light:  #f0e4c8;
+  --moss:        #2e4a30;
+  /* Minecraft button bevel colours */
+  --mc-green-hi: #5d8f5f;
+  --mc-green-sh: #1a2e1c;
+  --mc-stone-hi: #909090;
+  --mc-stone-sh: #303030;
+ 
+  --r-xs:2px; --r-sm:2px; --r-md:4px; --r-lg:6px;
+  /* Pixel-style shadows */
+  --shadow-sm: 2px 2px 0 rgba(0,0,0,0.25);
+  --shadow-md: 3px 3px 0 rgba(0,0,0,0.30);
+  --shadow-lg: 4px 4px 0 rgba(0,0,0,0.40);
+}
+
+html { font-size:16px; }
+body { font-family:"DM Sans",sans-serif; 
+  background:var(--cream); 
+  color:var(--text-dark); 
+  -webkit-font-smoothing:antialiased;
+   min-height:100vh; 
+  }
+
+/* ── NAV — bright Minecraft UI bar ────*/
+.nav {
+  background: var(--white);
+  border-bottom: 3px solid #b7aea2;
+  padding: 0 24px;
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between;
+  position:sticky; 
+  top:0; 
+  z-index:100; 
+  height:47px;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.14);
+}
+
+.nav-left { 
+  display:flex; 
+  align-items:center; 
+  gap:0; 
+}
+
+.nav-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  color: #2f5a33;
+  text-decoration: none;
+  letter-spacing: 0;
+  padding: 14px 0;
+  margin-right: 24px;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
+  line-height: 1.4;
+}
+
+.nav-logo span { 
+  color: #9b6f19;
+ }
+
+.nav-tabs { 
+  display:flex; 
+  align-items:center; 
+  gap:3px; }
+
+.nav-tab {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-mid);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 0;
+  transition: filter 0.1s, color 0.1s;
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: "DM Sans",sans-serif;
+}
+
+.nav-tab:hover {
+  background: #e6efe0;
+  color: var(--text-dark);
+  border-top-color: #f7faf2;
+  border-left-color: #f7faf2;
+  border-bottom-color: #9ba293;
+  border-right-color: #9ba293;
+}
+.nav-tab.active {
+  background: var(--sage-deep);
+  color: #fff;
+  font-weight: 700;
+  border-top: 2px solid var(--mc-green-hi);
+  border-left: 2px solid var(--mc-green-hi);
+  border-bottom: 2px solid var(--mc-green-sh);
+  border-right: 2px solid var(--mc-green-sh);
+}
+.nav-right { display:flex; align-items:center; gap:10px; }
+
+/* Nav sign-in button — Minecraft green */
+.nav-login-btn {
+  padding: 6px 14px;
+  background: var(--sage-deep);
+  color: #fff;
+  border: none;
+  border-top: 2px solid var(--mc-green-hi);
+  border-left: 2px solid var(--mc-green-hi);
+  border-bottom: 2px solid var(--mc-green-sh);
+  border-right: 2px solid var(--mc-green-sh);
+  border-radius: 0;
+  font-family: "DM Sans",sans-serif;
+  font-size: 12px; 
+  font-weight: 500;
+  cursor: pointer; 
+  text-decoration: none;
+  transition: filter 0.1s;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  display: inline-block;
+}
+.nav-login-btn:hover { filter: brightness(1.15); }
+
+.nav-login-btn:active {
+  border-top-color: var(--mc-green-sh); 
+  border-left-color: var(--mc-green-sh);
+  border-bottom-color: var(--mc-green-hi); 
+  border-right-color: var(--mc-green-hi);
+  transform: translateY(1px);
+}
+
+/* Nav user pill */
+.nav-user-pill {
+  display:flex; align-items:center; gap:8px;
+  padding: 4px 10px 4px 4px;
+  background: #ece8df;
+  border-radius: 0;
+  font-size: 12px; 
+  color: var(--text-dark); 
+  font-weight: 500;
+  text-decoration: none;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #9a9185;
+  border-right: 2px solid #9a9185;
+}
+.nav-user-dot {
+  width: 28px; height: 28px;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: 11px; 
+  font-weight: 600; 
+  color: #fff;
+  font-family: "DM Sans",sans-serif;
+  image-rendering: pixelated;
+  background: linear-gradient(135deg, var(--sage), var(--moss)); 
+}
+.nav-user-dot img {
+  width: 100%; 
+  height: 100%;
+  object-fit: cover; 
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* ── BUTTONS — Minecraft  */
+.btn-primary {
+  display: block; 
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--sage-deep); 
+  color: #fff;
+  border: none;
+  border-top: 3px solid var(--mc-green-hi);
+  border-left: 3px solid var(--mc-green-hi);
+  border-bottom: 3px solid var(--mc-green-sh);
+  border-right: 3px solid var(--mc-green-sh);
+  border-radius: 0;
+  font-family: "DM Sans",sans-serif; 
+  font-size: 14px; 
+  font-weight: 500;
+  text-align: center; 
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.1s, transform 0.1s;
+  letter-spacing: 0.3px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  box-shadow: none;
+}
+
+.btn-primary:hover { 
+  filter: brightness(1.12); 
+  transform: none; 
+  box-shadow: none;
+ }
+
+.btn-primary:active {
+  border-top-color: var(--mc-green-sh); 
+  border-left-color: var(--mc-green-sh);
+  border-bottom-color: var(--mc-green-hi); 
+  border-right-color: var(--mc-green-hi);
+  transform: translateY(1px); 
+  filter: none;
+}
+
+.btn-ghost {
+  width: 100%;
+   padding: 11px;
+  background: #6e6e6e; 
+  color: #fff;
+  border: none;
+  border-top: 3px solid var(--mc-stone-hi);
+  border-left: 3px solid var(--mc-stone-hi);
+  border-bottom: 3px solid var(--mc-stone-sh);
+  border-right: 3px solid var(--mc-stone-sh);
+  border-radius: 0;
+  font-family: "DM Sans",sans-serif; 
+  font-size: 13px;
+  cursor: pointer;
+  transition: filter 0.1s;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+.btn-ghost:hover { filter: brightness(1.12); }
+
+.btn-ghost:active {
+  border-top-color: var(--mc-stone-sh); 
+  border-left-color: var(--mc-stone-sh);
+  border-bottom-color: var(--mc-stone-hi);
+   border-right-color: var(--mc-stone-hi);
+  transform: translateY(1px);
+}
+
+/* ── FORM ───*/
+.field-label { 
+  display:block; 
+  font-size:11px; 
+  font-weight:500; 
+  color:var(--text-mid); 
+  margin-bottom:6px; 
+  letter-spacing:0.6px; 
+  text-transform:uppercase;
+ }
+
+.field-input {
+  width: 100%; 
+  padding: 11px 14px;
+  border: none;
+  border-top: 2px solid #b8b0a8;
+  border-left: 2px solid #b8b0a8;
+  border-bottom: 2px solid #e8e2da;
+  border-right: 2px solid #e8e2da;
+  border-radius: 0;
+  font-family: "DM Sans",sans-serif; 
+  font-size: 14px; 
+  color: var(--text-dark);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px; outline: none;
+}
+.field-input:focus {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(90,122,92,0.12);
+}
+
+.field-input::placeholder { 
+  color: var(--stone);
+ }
+
+.field-input.error { 
+  border-color: #c0392b;
+ }
+
+.error-msg { font-size:12px; 
+  color:#c0392b; 
+  margin-top:-10px; 
+  margin-bottom:14px; 
+  display:none; 
+}
+
+.error-msg.visible { display:block; }
+
+.login-divider { 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  margin:20px 0; 
+  color:var(--stone); 
+  font-size:12px; 
+}
+
+.login-divider::before,.login-divider::after { 
+  content:""; 
+  flex:1; 
+  height:1px; 
+  background:var(--stone-light);
+ }
+
+
+/* ── CARDS  ─────*/
+.card {
+  background: var(--white);
+  border-radius: 0;
+  padding: 22px 24px;
+  border: none;
+  border-top: 2px solid #e4ddd5;
+  border-left: 2px solid #e4ddd5;
+  border-bottom: 2px solid #b0a898;
+  border-right: 2px solid #b0a898;
+  box-shadow: var(--shadow-sm);
+}
+.card-title { 
+  font-size:13px; 
+  font-weight:500; 
+  color:var(--text-dark); 
+  margin-bottom:16px;
+ }
+
+.panel-title { 
+  font-size:11px; 
+  font-weight:500; 
+  color:var(--text-light); 
+  letter-spacing:0.8px; 
+  text-transform:uppercase; 
+  margin-bottom:16px;
+ }
+
+/* ── AVATAR  ── */
+.avatar {
+  border-radius: 2px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-family: "DM Sans",sans-serif; 
+  font-weight: 700; 
+  color: #fff;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+
+img.avatar, img.mc-avatar {
+  object-fit: cover;
+  image-rendering: pixelated;
+  border-radius: 2px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ── LOGIN GATE MODAL ───────── */
+.login-gate { 
+  position:fixed; 
+  inset:0; background:rgba(0,0,0,0.7);
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  z-index:500; 
+  opacity:0; 
+  pointer-events:none; 
+  transition:opacity 0.25s; 
+}
+
+.login-gate.show { opacity:1; pointer-events:all; }
+
+.login-gate-box {
+  background: var(--white);
+  border-radius: 0;
+  border-top: 3px solid #666;
+  border-left: 3px solid #666;
+  border-bottom: 3px solid #111;
+  border-right: 3px solid #111;
+  padding: 40px 44px;
+  text-align: center; 
+  max-width: 380px; 
+  width: 90%;
+  box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+  animation: gateIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes gateIn { from{transform:scale(0.75);opacity:0} to{transform:scale(1);opacity:1} }
+
+.gate-icon { 
+  font-size:36px;
+   margin-bottom:14px;
+   }
+
+.gate-title { 
+  font-family:"DM Sans",sans-serif; 
+  font-size:22px; 
+  font-weight:700; 
+  margin-bottom:8px; 
+  color:var(--text-dark); 
+}
+
+.gate-sub { 
+  font-size:13px; 
+  color:var(--text-light); 
+  margin-bottom:24px; 
+  line-height:1.6;
+ }
+
+.gate-btns{ 
+  display:flex;
+   flex-direction:column; 
+   gap:10px; 
+  }
+
+.gate-btn-primary {
+  padding: 12px; background: var(--sage-deep); color: #fff;
+  border: none;
+  border-top: 3px solid var(--mc-green-hi);
+  border-left: 3px solid var(--mc-green-hi);
+  border-bottom: 3px solid var(--mc-green-sh);
+  border-right: 3px solid var(--mc-green-sh);
+  border-radius: 0;
+  font-family: "DM Sans",sans-serif; 
+  font-size:14px; 
+  font-weight:500;
+  cursor: pointer; 
+  text-decoration:none; 
+  display:block;
+  transition: filter 0.1s;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+.gate-btn-primary:hover { filter: brightness(1.12); }
+
+.gate-btn-ghost {
+  padding: 11px; 
+  background: #6e6e6e; 
+  color: #fff;
+  border: none;
+  border-top: 3px solid var(--mc-stone-hi);
+  border-left: 3px solid var(--mc-stone-hi);
+  border-bottom: 3px solid var(--mc-stone-sh);
+  border-right: 3px solid var(--mc-stone-sh);
+  border-radius: 0;
+  font-family: "DM Sans",sans-serif; 
+  font-size:13px;
+  cursor: pointer;
+  transition: filter 0.1s;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+.gate-btn-ghost:hover {
+   filter: brightness(1.12); 
+  }
+
+.gate-dismiss { 
+  font-size:12px; 
+  color:var(--text-light); 
+  margin-top:14px; 
+  cursor:pointer;
+ }
+
+.gate-dismiss:hover { 
+  color:var(--text-mid);
+ }
+
+
+/* ── UTILITY ─────*/
+.text-center { text-align:center; }
+a { color:inherit; }
+
+/* ── TOAST — Minecraft dark box ───*/
+.toast {
+  position: fixed; bottom: 32px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #2c2c2c; color: #fff;
+  padding: 13px 24px;
+  border-radius: 0;
+  border-top: 2px solid #555;
+  border-left: 2px solid #555;
+  border-bottom: 2px solid #111;
+  border-right: 2px solid #111;
+  font-size: 13.5px;
+  z-index: 400; opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none; white-space: nowrap;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+.toast.show   { 
+  opacity: 1; 
+  transform: translateX(-50%) translateY(0);
+ }
+
+.toast.error  {
+  background: #7a1a1a;
+  border-top-color: #aa3a3a; 
+  border-left-color: #aa3a3a;
+  border-bottom-color: #3a0a0a;
+   border-right-color: #3a0a0a;
+}
+
+.toast.success {
+  background: var(--sage-deep);
+  border-top-color: var(--mc-green-hi); 
+  border-left-color: var(--mc-green-hi);
+  border-bottom-color: var(--mc-green-sh); 
+  border-right-color: var(--mc-green-sh);
+}

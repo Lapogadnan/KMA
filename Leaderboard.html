@@ -58,16 +58,11 @@
        box-shadow:var(--shadow-sm); 
       }
     .lb-header {
-      display:grid; 
-      grid-template-columns:36px 1fr 90px 90px 80px;
-      padding:12px 20px; 
-      background:var(--cream-dark);
+      display:grid; grid-template-columns:36px 1fr 90px 90px 80px;
+      padding:12px 20px; background:var(--cream-dark);
       border-bottom:1px solid var(--stone-light);
-      font-size:11px; 
-      font-weight:500; 
-      color:var(--text-light);
-      letter-spacing:0.5px; 
-      text-transform:uppercase;
+      font-size:11px; font-weight:500; color:var(--text-light);
+      letter-spacing:0.5px; text-transform:uppercase;
     }
     .lb-row {
       display:grid; 
@@ -242,13 +237,8 @@
 
     /*  Online presence dot  */
     .online-dot-lb {
-      display: inline-block; 
-      width: 8px; 
-      height: 8px; 
-      border-radius: 50%;
-      background: var(--stone-light); 
-      flex-shrink: 0; 
-      margin-right: 4px;
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--stone-light); flex-shrink: 0; margin-right: 4px;
       transition: background 0.3s, box-shadow 0.3s;
     }
     .online-dot-lb.on { 
@@ -274,6 +264,7 @@
       background: var(--sage-deep); 
       color: #fff; 
     }
+    .lb-duel-btn:hover { background: var(--sage-deep); color: #fff; }
 
     /* Full-page background image */
     .lb-bg {
@@ -359,6 +350,7 @@
         <button class="btn-challenge" onclick="window.location.href='map.html'">⚔ Challenge someone on the map</button>
       </div>
 
+      <!-- Badges — TODO: read from users/{uid}.badges in Firestore -->
       <div class="badges-wrap">
         <div class="card-title">Your badges</div>
         <div class="badge-grid" id="badges-grid">
@@ -375,7 +367,7 @@
       </div>
     </div>
 
-  </div>
+  </div><!-- /.lb-page -->
 
   <!-- Toast -->
   <div class="toast" id="lb-toast"></div>
