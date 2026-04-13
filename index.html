@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kill My Assignments — Timer</title>
-  
+
   <link rel="stylesheet" href="shared.css">
+  <script src="face-utils.js"></script>
+  <script src="audio.js"></script>
   <style>
     .timer-page {
       min-height: calc(100vh - 47px);
@@ -32,63 +34,67 @@
     }
 
     /* Phase label + score chip row */
-    .timer-meta { display: flex; 
-      align-items: center; 
-      gap: 14px; 
-      margin-bottom: 32px; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-    }
-
-    .timer-label { font-size: 12px; 
-      font-weight: 500; color:black; 
-      letter-spacing: 1.5px; 
-      text-transform: uppercase;
+    .timer-meta { 
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
      }
-
-    .score-chip  { 
+    .timer-label {
        font-size: 12px;
        font-weight: 500; 
-       color: var(--sage-deep); 
-       background: var(--sage-light); 
-       padding: 4px 12px; 
-       border-radius: 99px; 
-       transition: background 0.3s; 
+       color:black; 
+       letter-spacing: 1.5px; 
+       text-transform: uppercase; 
       }
-
-    .score-chip.bonus-flash { 
-      background: var(--gold-light); 
+    .score-chip {
+      font-size: 12px; 
+      font-weight: 500; 
+      color: #fff;
+      background: var(--sage-deep);
+      border-top: 2px solid var(--mc-green-hi);
+      border-left: 2px solid var(--mc-green-hi);
+      border-bottom: 2px solid var(--mc-green-sh);
+      border-right: 2px solid var(--mc-green-sh);
+      padding: 4px 12px; border-radius: 2px;
+      transition: background 0.3s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
     }
+    .score-chip.bonus-flash { 
+      background: #8a6020;
+      border-top-color:#c09040; 
+      border-left-color:#c09040; 
+      border-bottom-color:#3a2000; 
+      border-right-color:#3a2000;
+      }
 
     /* Ring */
-    .timer-ring-wrap {
-       position: relative; 
-       margin-bottom: 36px; 
-      }
-
-    .timer-ring-svg { 
-      transition: none; 
-    } /* ring colour animates via stroke */
-
+    .timer-ring-wrap { 
+      position: relative; 
+      margin-bottom: 36px; 
+    }
+    .timer-ring-svg {
+       transition: none; 
+    } 
     #timer-ring { 
       transition: stroke 0.6s ease; 
     }
-
     .timer-display {
-      position: absolute; top: 50%; left: 50%;
+      position: absolute; 
+      top: 50%; 
+      left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
     }
-
-    .timer-number {
-     font-family: "Playfair Display",serif;
-     font-size: 52px; 
-     font-weight: 400; 
-     color: var(--text-dark); 
-     letter-spacing: -2px; 
-     line-height: 1;
-     }
-
+    .timer-number { 
+    font-family: "Press Start 2P", monospace; 
+    font-size: 34px; font-weight: 400; 
+    color: var(--text-dark); 
+    letter-spacing: 0; 
+    line-height: 1.2; 
+   }
     .timer-phase  { 
       font-size: 11px; 
       color: black; 
@@ -101,33 +107,53 @@
       display: flex; 
       gap: 12px; 
       align-items: center; 
-      margin-bottom: 32px;
-     }
+      margin-bottom: 32px; 
+    }
     .timer-btn {
       width: 52px; 
       height: 52px; 
-      border-radius: 50%;
-      border: 1.5px solid var(--stone-light); background: var(--white);
-      cursor: pointer; transition: all 0.2s;
+      border-radius: 2px;
+      border: none;
+      border-top: 3px solid var(--mc-stone-hi);
+      border-left: 3px solid var(--mc-stone-hi);
+      border-bottom: 3px solid var(--mc-stone-sh);
+      border-right: 3px solid var(--mc-stone-sh);
+      background: #6e6e6e; color: #fff;
+      cursor: pointer; transition: filter 0.1s;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; box-shadow: var(--shadow-sm);
+      font-size: 18px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
     }
     .timer-btn:hover { 
-      border-color: var(--sage); 
-      background: var(--sage-light); 
+      filter: brightness(1.18); 
+    }
+    .timer-btn:active {
+      border-top-color: var(--mc-stone-sh); 
+      border-left-color: var(--mc-stone-sh);
+      border-bottom-color: var(--mc-stone-hi); 
+      border-right-color: var(--mc-stone-hi);
+      transform: translateY(1px);
     }
     .timer-btn-main {
-      width: 64px; 
-      height: 64px;
-      background: var(--sage-deep);
-      border: none; 
-      border-radius: 50%;
-      font-size: 22px; 
-      color: white;
-      box-shadow: 0 4px 14px rgba(53,79,55,0.28);
+      width: 64px; height: 64px;
+      background: var(--sage-deep); border: none; border-radius: 2px;
+      border-top: 3px solid var(--mc-green-hi);
+      border-left: 3px solid var(--mc-green-hi);
+      border-bottom: 3px solid var(--mc-green-sh);
+      border-right: 3px solid var(--mc-green-sh);
+      font-size: 22px; color: white;
+      box-shadow: none;
     }
     .timer-btn-main:hover { 
-      background: var(--moss); 
+      filter: brightness(1.12); 
+      background: var(--sage-deep); 
+    }
+    .timer-btn-main:active {
+      border-top-color: var(--mc-green-sh); 
+      border-left-color: var(--mc-green-sh);
+      border-bottom-color: var(--mc-green-hi); 
+      border-right-color: var(--mc-green-hi);
+      transform: translateY(1px);
     }
 
     /* Guest banner */
@@ -143,14 +169,14 @@
       backdrop-filter: blur(4px);
     }
     .guest-banner-icon { 
-      font-size: 22px; 
+      font-size: 22px;
       flex-shrink: 0; 
-    }
+      }
     .guest-banner-text { 
-      font-size: 12.5px; 
-      color: var(--text-mid); 
-      line-height: 1.5; 
-    }
+      font-size: 12.5px;
+       color: var(--text-mid); 
+       line-height: 1.5; 
+      }
     .guest-banner-text a { 
       color: var(--sage-deep); 
       font-weight: 500; 
@@ -167,71 +193,78 @@
       justify-content: center;
       z-index: 200;
       opacity: 0; 
-      pointer-events: none;
+      pointer-events: none; 
       transition: opacity 0.3s;
     }
     .popup-overlay.show { 
-      opacity: 1; 
-      pointer-events: all; 
-    }
+      opacity: 1;
+       pointer-events: all;
+       }
     .popup-box {
       background: var(--white); 
       border-radius: var(--r-lg);
       padding: 40px 48px; 
-      text-align: center; 
-      max-width: 380px;
+      text-align: center;
+       max-width: 380px;
       box-shadow: var(--shadow-lg);
       animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
     }
-
     @keyframes popIn { 
-      from{transform:scale(0.7);
-      opacity:0
-    } to{transform:scale(1);opacity:1} }
-
+      from{transform:scale(0.7);opacity:0}
+      to{transform:scale(1);opacity:1} 
+    }
     .popup-emoji { 
-      font-size: 40px;
-      margin-bottom: 16px; 
+      font-size: 40px; 
+      margin-bottom: 16px;
     }
     .popup-title { 
-      font-family: "Playfair Display",serif; 
+      font-family: "DM Sans",sans-serif; 
       font-size: 22px; 
+      font-weight: 700; 
       margin-bottom: 8px; 
       color: var(--text-dark); 
     }
-    .popup-sub   { 
-      font-size: 13px; 
-      color: var(--text-light); 
-      margin-bottom: 24px; 
-      line-height: 1.6; 
-    
-    }
+    .popup-sub{ 
+       font-size: 13px;
+       color: var(--text-light);
+       margin-bottom: 24px;
+       line-height: 1.6; 
+      }
     #checkin-countdown { 
-      font-weight: 700; color: var(--sage-deep); 
+      font-weight: 700; 
+      color: var(--sage-deep); 
       transition: color 0.3s; 
     }
     #checkin-countdown.urgent { 
-      color: #c0392b; 
-    }
+      color: #c0392b;
+     }
     .popup-btn {
-      padding: 14px 40px; 
-      background: var(--sage-deep); 
-      color: #fff;
-      border: none; 
-      border-radius: var(--r-sm); 
-      font-size: 14px; 
-      font-weight: 500;
-      cursor: pointer; 
-      font-family: "DM Sans",sans-serif;
-      transition: background 0.2s; box-shadow: 0 2px 8px rgba(53,79,55,0.2);
+      padding: 14px 40px; background: var(--sage-deep); color: #fff;
+      border: none;
+      border-top: 3px solid var(--mc-green-hi);
+      border-left: 3px solid var(--mc-green-hi);
+      border-bottom: 3px solid var(--mc-green-sh);
+      border-right: 3px solid var(--mc-green-sh);
+      border-radius: 0; font-size: 14px; font-weight: 500;
+      cursor: pointer; font-family: "DM Sans",sans-serif;
+      transition: filter 0.1s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
     }
     .popup-btn:hover { 
-      background: var(--moss); 
+      filter: brightness(1.12); 
+    }
+    .popup-btn:active {
+      border-top-color: var(--mc-green-sh); 
+      border-left-color: var(--mc-green-sh);
+      border-bottom-color: var(--mc-green-hi); 
+      border-right-color: var(--mc-green-hi);
+      transform: translateY(1px);
     }
 
     /* ── Sidebar ── */
     .timer-sidebar {
-      position: relative; z-index: 1;
+      position: relative; 
+      z-index: 1;
       background: rgba(253,252,250,0.96);
       border-left: 1px solid var(--stone-light);
       padding: 28px 24px; overflow-y: auto;
@@ -240,87 +273,102 @@
 
     /* Duration steppers */
     .setting-row {
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: space-between;
-      padding: 11px 0; 
+      padding: 11px 0;
       border-bottom: 1px solid var(--cream-dark);
     }
     .setting-row:last-of-type { 
       border-bottom: none;
-    }
+     }
     .setting-label { 
-      font-size: 13px; 
-      color: var(--text-mid); 
-    }
-    .setting-value { 
       font-size: 13px;
+      color: var(--text-mid);
+       }
+    .setting-value { 
+      font-size: 13px; 
       font-weight: 500; 
       color: var(--sage-deep); 
     }
     .stepper { 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-    }
+        display: flex;
+        align-items: center;
+        gap: 8px;
+       }
     .stepper-btn {
       width: 24px; 
       height: 24px; 
-      border-radius: 50%;
-      border: 1.5px solid var(--stone-light); 
-      background: var(--white);
+      border-radius: 0;
+      border: none;
+      border-top: 2px solid var(--mc-stone-hi);
+      border-left: 2px solid var(--mc-stone-hi);
+      border-bottom: 2px solid var(--mc-stone-sh);
+      border-right: 2px solid var(--mc-stone-sh);
+      background: #6e6e6e; color: #fff;
       cursor: pointer; 
       display: flex; 
       align-items: center; 
       justify-content: center;
-      font-size: 14px; 
+      font-size: 14px;
       font-weight: 500;
-      color: var(--text-mid);
-      line-height: 1; padding: 0;
-      transition: all 0.15s;
+      line-height: 1; 
+      padding: 0; 
+      transition: filter 0.1s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
     }
     .stepper-btn:hover { 
-      border-color: var(--sage); 
-      background: var(--sage-light); 
-      color: var(--sage-deep); 
+      filter: brightness(1.18); 
+    }
+    .stepper-btn:active {
+      border-top-color: var(--mc-stone-sh);
+      border-left-color: var(--mc-stone-sh);
+      border-bottom-color: var(--mc-stone-hi);
+      border-right-color: var(--mc-stone-hi);
+      transform: translateY(1px);
     }
     .stepper-val { 
-      font-size: 13px; 
-      font-weight: 500; color: var(--sage-deep);
-       min-width: 24px; text-align: center; 
+       font-size: 13px;
+       font-weight: 500; 
+       color: var(--sage-deep); 
+       min-width: 24px; 
+       text-align: center; 
       }
-    .stepper-unit {
-      font-size: 11px; 
-      color: var(--text-light);
-     }
+    .stepper-unit { 
+       font-size: 11px;
+       color: var(--text-light);
+       }
 
-    /* YouTube embed — responsive 16:9 */
+    /* YouTube embed */
     .youtube-wrap {
-      position: relative; 
+      position: relative;
       padding-bottom: 56.25%;
       height: 0;
       overflow: hidden; 
-      border-radius: var(--r-md);
+      border-radius: var(--r-md); 
       margin-top: 20px;
     }
     .youtube-wrap iframe {
       position: absolute; 
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%; 
       border: 0;
     }
 
     /* Duel locked (hidden once logged in) */
     .duel-locked {
-      margin-top: 18px; 
+      margin-top: 18px;
       border: 1.5px dashed var(--stone-light);
-      border-radius: var(--r-md); padding: 16px; 
+      border-radius: var(--r-md); 
+      padding: 16px; 
       text-align: center;
     }
     .duel-locked-icon  { 
       font-size: 22px; 
-      margin-bottom: 6px;
-     }
+      margin-bottom: 6px; 
+    }
     .duel-locked-title { 
       font-size: 13px; 
       font-weight: 500; 
@@ -333,23 +381,56 @@
       margin-bottom: 12px; 
       line-height: 1.5; 
     }
-    .duel-locked-btn   { 
+    .duel-locked-btn {
       display: block; 
       padding: 9px; 
       background: var(--sage-deep); 
-      color: #fff; 
-      border-radius: var(--r-sm); 
-      font-size: 12px; 
-      font-weight: 500; 
-      text-decoration: none; 
-      transition: background 0.2s; 
+      color: #fff;
+      border: none;
+      border-top: 2px solid var(--mc-green-hi);
+      border-left: 2px solid var(--mc-green-hi);
+      border-bottom: 2px solid var(--mc-green-sh);
+      border-right: 2px solid var(--mc-green-sh);
+      border-radius: 0; font-size: 12px; font-weight: 500;
+      text-decoration: none; transition: filter 0.1s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
     }
-    .duel-locked-btn:hover { 
-      background: var(--moss); 
+    .duel-locked-btn:hover { filter: brightness(1.12); }
+    
+    .mc-toggle {
+      border: none; 
+      padding: 4px 14px; 
+      font-size: 11px; 
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.3px; 
+      color: #fff;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+      transition: filter 0.1s;
     }
+    .mc-toggle-on {
+      background: var(--sage-deep);
+      border-top: 2px solid var(--mc-green-hi);
+      border-left: 2px solid var(--mc-green-hi);
+      border-bottom: 2px solid var(--mc-green-sh);
+      border-right: 2px solid var(--mc-green-sh);
+    }
+    .mc-toggle-off {
+      background: #6e6e6e;
+      border-top: 2px solid var(--mc-stone-hi);
+      border-left: 2px solid var(--mc-stone-hi);
+      border-bottom: 2px solid var(--mc-stone-sh);
+      border-right: 2px solid var(--mc-stone-sh);
+    }
+    .mc-toggle:hover { filter: brightness(1.15); }
 
-    .timer-page { background: transparent; }
-      body { background: transparent; }
+    .timer-page { 
+      background: transparent;
+     }
+    body { 
+      background: transparent;
+     }
 
     /* ── Duel active banner ── */
     .duel-banner {
@@ -357,22 +438,22 @@
       position: relative; 
       z-index: 10;
       background: linear-gradient(135deg, var(--sage-deep), var(--moss));
-      color: #fff; text-align: center; 
+      color: #fff; 
+      text-align: center;
       padding: 10px 20px;
       font-size: 13px; 
       font-weight: 500; 
       font-family: "DM Sans", sans-serif;
       letter-spacing: 0.2px;
     }
-    .duel-banner.show { 
-      display: block; 
-    }
+    .duel-banner.show { display: block; }
   </style>
 </head>
 <body>
 
   <!-- Background gif -->
-  <img class="timer-bg-gif"src="download.gif" alt="">
+  <img class="timer-bg-gif"src="download.gif"
+    alt="">
 
   <!-- CHECK-IN POPUP -->
   <div class="popup-overlay" id="checkin-popup">
@@ -402,7 +483,7 @@
       </div>
       <div style="display:flex;gap:10px;">
         <button class="popup-btn" id="duel-accept-btn" style="flex:1">Accept ⚔</button>
-        <button id="duel-decline-btn" style="flex:1;padding:14px;border:1.5px solid var(--stone-light);background:var(--white);border-radius:var(--r-sm);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">Decline</button>
+        <button id="duel-decline-btn" style="flex:1;padding:14px;border:none;border-top:3px solid var(--mc-stone-hi);border-left:3px solid var(--mc-stone-hi);border-bottom:3px solid var(--mc-stone-sh);border-right:3px solid var(--mc-stone-sh);background:#6e6e6e;color:#fff;border-radius:0;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;text-shadow:1px 1px 0 rgba(0,0,0,0.5);">Decline</button>
       </div>
     </div>
   </div>
@@ -412,7 +493,7 @@
     ⚔ DUEL IN PROGRESS vs <span id="duel-banner-name">Opponent</span> — quit or miss a check-in and you lose!
   </div>
 
-  <!-- Toast notification -->
+  <!-- Toast notification (bottom-centre) -->
   <div class="toast" id="toast"></div>
 
   <!-- NAV  -->
@@ -434,27 +515,22 @@
   <!-- TIMER PAGE -->
   <div class="timer-page">
 
-    <!-- ── Left: timer ── -->
     <div class="timer-main">
-      <!-- Phase label and live score -->
       <div class="timer-meta">
         <div class="timer-label" id="session-label">Work session · Cycle 1</div>
         <div class="score-chip" id="score-chip">0 pts</div>
       </div>
 
       <div class="timer-ring-wrap">
-        <!-- SVG Ring-->
+       
         <svg class="timer-ring-svg" width="220" height="220" viewBox="0 0 220 220">
-          <!-- Background track -->
           <circle cx="110" cy="110" r="96" fill="none" stroke="#ddd8d0" stroke-width="10"/>
-          <!-- Progress ring -->
           <circle id="timer-ring"
             cx="110" cy="110" r="96"
             fill="none" stroke="#354f37" stroke-width="10"
             stroke-dasharray="603.2" stroke-dashoffset="0"
             stroke-linecap="round"
             transform="rotate(-90 110 110)"/>
-          <!-- Small decorative dot at top -->
           <circle id="timer-ring-dot" cx="110" cy="14" r="4" fill="#354f37" opacity="0.5"/>
         </svg>
         <div class="timer-display">
@@ -479,11 +555,10 @@
       </div>
     </div>
 
-    <!-- Right: settings sidebar -->
+
     <div class="timer-sidebar">
       <div class="panel-title">Timer settings</div>
 
-      <!-- Duration steppers -->
       <div class="setting-row">
         <div class="setting-label">Work session</div>
         <div class="stepper">
@@ -504,15 +579,10 @@
         </div>
       </div>
 
-      <!-- Check-in toggle  -->
+      <!-- Check-in toggle -->
       <div class="setting-row">
         <div class="setting-label">Check-in prompts</div>
-        <button id="checkin-toggle" style="
-          background: var(--sage-deep); color: #fff;
-          border: none; border-radius: 99px;
-          padding: 3px 12px; font-size: 11px; font-weight: 500;
-          font-family: 'DM Sans',sans-serif; cursor: pointer;
-          transition: background 0.2s; letter-spacing: 0.3px;">On ●</button>
+        <button id="checkin-toggle" class="mc-toggle mc-toggle-on">On ●</button>
       </div>
 
       <div class="setting-row">
@@ -520,7 +590,6 @@
         <div class="setting-value" id="cycle-count-display">0</div>
       </div>
 
-      <!--"Working on" field -->
       <div style="padding:12px 0 14px;border-bottom:1px solid var(--cream-dark);">
         <div class="setting-label" style="margin-bottom:7px;">Working on</div>
         <input id="subject-input" class="field-input" type="text"
@@ -528,7 +597,6 @@
           style="margin-bottom:0;font-size:13px;padding:8px 12px;background:var(--cream);">
       </div>
 
-      <!-- YouTube embed -->
       <div class="youtube-wrap">
         <iframe
           src="https://www.youtube.com/embed/ANkxRGvl1VY?si=xZMAWKmSeIJsNM-i"
@@ -551,7 +619,6 @@
   </div>
 
   <!-- TIMER LOGIC + FIREBASE AUTH -->
- 
   <script type="module">
     import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged }
@@ -565,9 +632,9 @@
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
-    let currentUser = null; // set once auth state resolves
+    let currentUser = null; 
 
-    // Auth: update nav and hide guest-only elements 
+    //  Auth: update nav and hide guest-only elements 
     onAuthStateChanged(auth, user => {
       currentUser = user;
       const navRight = document.getElementById("nav-right");
@@ -577,7 +644,7 @@
         const initial = name.charAt(0).toUpperCase();
         navRight.innerHTML = `
           <a href="dashboard.html" class="nav-user-pill">
-            <div class="nav-user-dot">${initial}</div>
+            <img src="${window.getFace ? window.getFace(user.uid) : ''}" class="nav-user-dot" alt="${initial}" style="width:28px;height:28px;object-fit:cover;image-rendering:pixelated;border-radius:2px;">
             <span>${name.split(" ")[0]}</span>
           </a>`;
         document.getElementById("guest-banner").style.display = "none";
@@ -587,13 +654,14 @@
       // else: default "Sign in" button and guest banner remain
     });
 
+    
     //  CONSTANTS & STATE
-
+  
     const CIRC = 2 * Math.PI * 96; 
     const WORK_COLOUR  = "#354f37"; 
     const BREAK_COLOUR = "#7AABB8"; 
 
-    // User-adjustable durations 
+    // User-adjustable durations (in minutes)
     let workMins  = 25;
     let breakMins = 5;
 
@@ -608,17 +676,16 @@
     let pendingBonus  = 0;  // check-in bonuses for current cycle (lost on failure)
     let cycleCount    = 0;  // completed work phases this session
 
-    // Check-in toggle state 
+    // Check-in toggle state — toggled by the sidebar button
     let checkinsEnabled = true;
 
-   
     let locationSet = false;
 
-    // Duel state 
+    // Duel state
     let activeDuelId       = null;   // Firestore doc ID of the active duel
     let isDueling          = false;
     let duelOpponentName   = null;
-    let duelWon            = false;  // set true when opponent loses
+    let duelWon            = false;  // set true when opponent loses; applied in onWorkComplete
     let duelReqCountdownId = null;   // interval for the 5-min accept countdown
     let duelUnsubscribe    = null;   // cleanup for the active-duel onSnapshot
 
@@ -630,8 +697,8 @@
     let checkinSecondsLeft       = 20;
     let checkinVisible           = false;
 
-  
     //  DISPLAY HELPERS
+  
     function updateDisplay() {
       const m = String(Math.floor(secs / 60)).padStart(2, "0");
       const s = String(secs % 60).padStart(2, "0");
@@ -640,7 +707,6 @@
       const offset = CIRC * (1 - secs / totalSecs);
       document.getElementById("timer-ring").setAttribute("stroke-dashoffset", offset.toFixed(1));
     }
-
 
     function updatePhaseUI() {
       const isWork  = phase === "work";
@@ -656,7 +722,7 @@
       document.getElementById("cycle-count-display").textContent = cycleCount;
     }
 
-     
+
     function updateScoreDisplay(flash = false) {
       const chip = document.getElementById("score-chip");
       chip.textContent = `${sessionScore + pendingBonus} pts`;
@@ -666,10 +732,9 @@
       }
     }
 
-    /**
-     * showToast(message, type)
-     * Briefly shows a bottom toast. type: "error" | "success"
-     */ 
+    
+    // Briefly shows a bottom toast. type: "error" | "success"
+     
     function showToast(message, type = "success") {
       const toast = document.getElementById("toast");
       toast.textContent = message;
@@ -677,10 +742,8 @@
       setTimeout(() => toast.classList.remove("show"), 3500);
     }
 
-
     //  DUEL SYSTEM
-    
-  
+   
     function startDuelListeners(uid) {
       // Listen for duel requests sent TO me
       onSnapshot(
@@ -694,8 +757,6 @@
           });
         }
       );
-
-      // Listen for duels I'm in that just became active (challenger side)
       onSnapshot(
         query(collection(db, "duels"), where("fromUid", "==", uid), where("status", "==", "active")),
         snap => {
@@ -709,10 +770,7 @@
       );
     }
 
-    /**
-     * showDuelRequest(duelId, data)
-     * Displays the incoming duel popup with a 5-min countdown.
-     */
+  
     function showDuelRequest(duelId, data) {
       document.getElementById("duel-challenger-name").textContent = data.fromName || "Someone";
       document.getElementById("duel-request-popup").classList.add("show");
@@ -747,10 +805,7 @@
       document.getElementById("duel-request-popup").classList.remove("show");
     }
 
-    /**
-     * acceptDuel(duelId, opponentName)
-     * Marks duel as active and puts both users into duel mode.
-     */
+ 
     async function acceptDuel(duelId, opponentName) {
       try {
         await updateDoc(doc(db, "duels", duelId), { status: "active" });
@@ -762,11 +817,7 @@
       }
     }
 
-    /**
-     * enterDuel(duelId, opponentName)
-     * Sets local duel state and shows the active banner.
-     * Also subscribes to the duel doc to detect when the opponent loses.
-     */
+ 
     function enterDuel(duelId, opponentName) {
       activeDuelId     = duelId;
       isDueling        = true;
@@ -783,12 +834,11 @@
         if (!snap.exists()) return;
         const d = snap.data();
         if (d.status === "completed" && d.loserUid && d.loserUid !== currentUser?.uid) {
-
+          // Opponent lost — I won
           duelWon = true;
           clearDuelState();
           showToast("⚔ You won the duel! 1.5× bonus on your next completed session.", "success");
         } else if (d.status === "completed" && d.loserUid === currentUser?.uid) {
-         
           clearDuelState();
         } else if (d.status === "declined" || d.status === "cancelled") {
           clearDuelState();
@@ -796,13 +846,9 @@
       });
     }
 
-    /**
-     * handleDuelLoss()
-     * Called when the current user restarts or misses a check-in while dueling.
-     * Marks them as the loser in Firestore, then calls loseProgress().
-     */
     async function handleDuelLoss() {
       if (!isDueling || !activeDuelId) return;
+      if (window.KMA) window.KMA.playCreeper();
       const duelRef = doc(db, "duels", activeDuelId);
       clearDuelState();
       try {
@@ -810,10 +856,7 @@
       } catch (err) { console.error("Duel loss write failed:", err); }
     }
 
-    /**
-     * clearDuelState()
-     * Resets all duel variables and hides the banner.
-     */
+   
     function clearDuelState() {
       isDueling      = false;
       activeDuelId   = null;
@@ -822,11 +865,6 @@
       document.getElementById("duel-banner").classList.remove("show");
     }
 
-    /**
-     * updatePresence(data)
-     * Single point of truth for all timer state → Firestore presence writes.
-     * The map, dashboard friends panel, and "studying count" all read from here.
-     */
     function updatePresence(data) {
       if (!currentUser) return;
       setDoc(doc(db, "activeSessions", currentUser.uid),
@@ -835,19 +873,16 @@
       ).catch(() => {});
     }
 
-    //  CHECK-IN SYSTEM  (work phases only)
-   
 
-    
-    // Schedules the next check-in popup.
-     
+    //  CHECK-IN SYSTEM  
+  
     function scheduleCheckin() {
       clearTimeout(checkinScheduleTimer);
-      if (!checkinsEnabled) return; // toggle is off 
+      if (!checkinsEnabled) return; // toggle is off — do nothing
 
       const sessionMs = workMins * 60 * 1000;
-      const minDelay  = Math.max(30_000,   sessionMs * 0.20); // 20% or 30 s
-      const maxDelay  = Math.min(900_000,  sessionMs * 0.50); // 50% or 15 min
+      const minDelay  = Math.max(30_000,   sessionMs * 0.20); 
+      const maxDelay  = Math.min(900_000,  sessionMs * 0.50); 
       // Ensure min < max (edge case: very short sessions where 50% < 30 s)
       const delay = minDelay + Math.random() * Math.max(0, maxDelay - minDelay);
 
@@ -856,11 +891,9 @@
       }, delay);
     }
 
-    /**
-     * showCheckin()
-     * Displays the popup and starts the 20-second countdown.
-     */
+   
     function showCheckin() {
+      if (window.KMA) window.KMA.playCheckin();
       checkinVisible     = true;
       checkinSecondsLeft = 20;
       const countdownEl  = document.getElementById("checkin-countdown");
@@ -880,11 +913,7 @@
     }
 
     /**
-     * dismissCheckin()
-     * Called when user clicks "I'm still here".
-     * Awards a scaled bonus and schedules the next check-in.
-     *
-     * SCALED BONUS — 40% of the per-minute point rate :
+     * SCALED BONUS — 40% of the per-minute point rate (4 pts/min × 0.1):
      *   5 min  → +2 pts per check-in
      *   25 min → +10 pts per check-in
      *   60 min → +24 pts per check-in
@@ -901,11 +930,6 @@
       if (running) scheduleCheckin(); // schedule next check-in
     }
 
-    /**
-     * cancelCheckin()
-     * Clears all check-in timers without penalty.
-     * Called on pause, skip, restart, and phase transitions.
-     */
     function cancelCheckin() {
       clearTimeout(checkinScheduleTimer);
       clearInterval(checkinCountdownInterval);
@@ -913,12 +937,8 @@
       document.getElementById("checkin-popup").classList.remove("show");
     }
 
-    /**
-     * Triggered when the 20-second dismiss window expires.
-     * Resets the current work phase. pendingBonus is forfeited.
-     * Completed previous cycles' scores are kept in sessionScore.
-     */
     function loseProgress() {
+      if (window.KMA) window.KMA.playCreeper();
       clearInterval(countdownInterval);
       clearTimeout(autoStartTimer);
       cancelCheckin();
@@ -939,9 +959,8 @@
     }
 
   
-    // COUNTDOWN 
+    //  COUNTDOWN ENGINE
    
-
     function startCountdown() {
       countdownInterval = setInterval(() => {
         secs--;
@@ -956,19 +975,14 @@
       }, 1000);
     }
 
-    /**
-     * onWorkComplete()
-     * Fires when a work phase counts down to zero.
-     * Awards score, switches to break, then auto-starts break after 1.5s.
-     * Writes to Firestore: user summary doc + session sub-collection.
-     */
     async function onWorkComplete() {
+      if (window.KMA) window.KMA.playAchievement();
       cancelCheckin();
       running = false;
 
       // SCALED SCORE — 4 pts per minute so longer sessions earn proportionally more.
       //   5 min  →  20 pts base
-      //   25 min → 100 pts base  
+      //   25 min → 100 pts base 
       //   60 min → 240 pts base
       //   90 min → 360 pts base
       const base    = Math.round(workMins * 4);
@@ -990,7 +1004,7 @@
       totalSecs = breakMins * 60;
       updatePhaseUI();
       updateDisplay();
-      updatePresence({ running: false, phase: "break" }); // transitioning 
+      updatePresence({ running: false, phase: "break" }); 
 
       // Auto-start break after brief toast window
       autoStartTimer = setTimeout(() => {
@@ -998,11 +1012,11 @@
           running = true;
           document.getElementById("play-btn").textContent = "⏸";
           startCountdown();
-          updatePresence({ running: true, phase: "break" }); 
+          updatePresence({ running: true, phase: "break" }); // break is now live
         }
       }, 1500);
 
-      // Write to Firestore (logged-in users only) 
+      //Write to Firestore (logged-in users only) 
       if (!currentUser) return;
 
       const subject = document.getElementById("subject-input").value.trim() || "General";
@@ -1010,7 +1024,6 @@
 
       try {
         // Streak calculation 
-        // Read the user doc first to compare lastSessionDate with today.
         const snap     = await getDoc(userRef);
         const existing = snap.exists() ? snap.data() : {};
         let streak     = existing.streak || 0;
@@ -1027,8 +1040,8 @@
           streak = 1; // very first session
         }
 
-        // Update user summary doc
-       
+        // Update user summary doc 
+        
         await updateDoc(userRef, {
           weeklyScore:             increment(earned),
           allTimeScore:            increment(earned),
@@ -1036,12 +1049,13 @@
           totalHours:              increment(workMins / 60),
           streak,
           lastSessionDate:         serverTimestamp(),
-      
           [`subjects.${subject}`]: increment(workMins),
+          // Keep displayName in sync so the leaderboard shows the right name.
           displayName: currentUser.displayName || currentUser.email.split("@")[0],
         });
 
-        // Write session record to sub-collection 
+        //Write session record to sub-collection
+        
         await addDoc(collection(db, "users", currentUser.uid, "sessions"), {
           subject,
           durationMins: workMins,
@@ -1050,17 +1064,15 @@
         });
 
         // Presence is already updated by updatePresence() calls above.
-
       } catch (err) {
         if (err.code === "not-found") {
-          // New user — their users/{uid} doc doesn't exist yet. Create it.
           await setDoc(userRef, {
             displayName:  currentUser.displayName || currentUser.email.split("@")[0],
             weeklyScore:  earned,
             allTimeScore: earned,
             totalSessions: 1,
-            totalHours:   workMins / 60,
-            streak:       1,
+            totalHours: workMins / 60,
+            streak:1,
             lastSessionDate: serverTimestamp(),
             subjects:     { [subject]: workMins },
           });
@@ -1075,13 +1087,13 @@
     }
 
     /**
-     * onBreakComplete()
      * Fires when a break phase counts down to zero.
      * Switches back to a work phase and auto-starts after 1.5s.
      */
     function onBreakComplete() {
       running = false;
       document.getElementById("play-btn").textContent = "▶";
+      if (window.KMA) window.KMA.playZombie();
       showToast("Break over — back to work!", "success");
 
       phase     = "work";
@@ -1103,12 +1115,12 @@
       }, 1500);
     }
 
+    
     //  TIMER CONTROLS
-   
-  
+    
     function toggleTimer() {
       if (running) {
-        // ── PAUSE ──
+        // PAUSE 
         running = false;
         clearInterval(countdownInterval);
         clearTimeout(autoStartTimer);
@@ -1118,7 +1130,8 @@
         updatePresence({ running: false });
 
       } else {
-        // ── START / RESUME ──
+        // START / RESUME 
+        if (window.KMA) window.KMA.playAnvil();
         running = true;
         document.getElementById("play-btn").textContent = "⏸";
         startCountdown();
@@ -1129,8 +1142,7 @@
           const displayName = currentUser.displayName || currentUser.email.split("@")[0];
 
           if (!locationSet) {
-            // First play: request geolocation and write lat/lng 
-            // The browser prompt fires once; subsequent resumes skip this block.
+            // ── First play: request geolocation and write lat/lng ──
             locationSet = true;
             const writeWithLoc = (lat, lng) => updatePresence({
               displayName, subject, phase, running: true,
@@ -1152,8 +1164,10 @@
       }
     }
 
-    //Restart Timer 
-  
+    /**
+     * Resets everything: score, cycles, phase, timers.
+     * Removes the user from activeSessions — they are no longer studying.
+     */
     function restartTimer() {
       clearInterval(countdownInterval);
       clearTimeout(autoStartTimer);
@@ -1180,7 +1194,6 @@
       if (isDueling) handleDuelLoss();
     }
 
-  
     function skipPhase() {
       clearInterval(countdownInterval);
       clearTimeout(autoStartTimer);
@@ -1188,13 +1201,13 @@
       running = false;
 
       if (phase === "work") {
-        // Skip work → move to break (no points)
+        // Skip work -> move to break (no points)
         pendingBonus = 0;
         phase     = "break";
         secs      = breakMins * 60;
         totalSecs = breakMins * 60;
       } else {
-        // Skip break → move to work
+        // Skip break -> move to work
         phase     = "work";
         secs      = workMins * 60;
         totalSecs = workMins * 60;
@@ -1205,10 +1218,13 @@
       updatePhaseUI();
     }
 
-   
+  
     //  DURATION SETTINGS
 
-    
+    /**
+     * Clamped steppers. If the timer is idle in the relevant phase,
+     * the change takes effect immediately. Otherwise it applies next cycle.
+     */
     function setWorkMins(val) {
       workMins = Math.max(5, Math.min(90, val));
       document.getElementById("work-display").textContent = workMins;
@@ -1230,26 +1246,23 @@
     document.getElementById("break-minus").addEventListener("click", () => setBreakMins(breakMins - 1));
     document.getElementById("break-plus").addEventListener("click",  () => setBreakMins(breakMins + 1));
 
-    
-    //Check-in toggle button
-    
+  
+     // Check-in toggle button 
     document.getElementById("checkin-toggle").addEventListener("click", () => {
       checkinsEnabled = !checkinsEnabled;
       const btn = document.getElementById("checkin-toggle");
       if (checkinsEnabled) {
-        btn.textContent                = "On ●";
-        btn.style.background           = "var(--sage-deep)";
-        // If timer is mid-session, schedule now so the user gets check-ins
+        btn.textContent = "On ●";
+        btn.classList.replace("mc-toggle-off", "mc-toggle-on");
         if (running && phase === "work") scheduleCheckin();
       } else {
-        btn.textContent                = "Off ○";
-        btn.style.background           = "var(--stone)";
-        // Cancel any pending check-in 
+        btn.textContent = "Off ○";
+        btn.classList.replace("mc-toggle-on", "mc-toggle-off");
         cancelCheckin();
       }
     });
 
-    
+  
     //  BUTTON WIRING
     
 
@@ -1258,22 +1271,22 @@
     document.getElementById("skip-btn").addEventListener("click",    skipPhase);
     document.getElementById("checkin-btn").addEventListener("click", dismissCheckin);
 
-   
+    
     //  SESSION CLEANUP ON PAGE EXIT
-  
+    //  Delete activeSessions doc whenever the user leaves this page, regardless of whether they refreshed, navigated away, or closed the tab.
+    //  The 4-hour stale filter on map/leaderboard is the secondary safety net.
+   
 
     function cleanupSession() {
+      if (running && window.KMA) try { window.KMA.playCreeper(); } catch(e) {}
       if (currentUser) {
-       
         deleteDoc(doc(db, "activeSessions", currentUser.uid)).catch(() => {});
       }
       if (isDueling) handleDuelLoss();
     }
 
-   
     window.addEventListener("pagehide", cleanupSession);
 
-    
     window.addEventListener("beforeunload", e => {
       cleanupSession();
       if (running) {
@@ -1282,8 +1295,8 @@
       }
     });
 
-   
-    //  INIT
+  
+    // INIT 
     updateDisplay();
     updatePhaseUI();
     updateScoreDisplay();

@@ -6,13 +6,14 @@
   <title>Kill My Assignments — About Us</title>
   
   <link rel="stylesheet" href="shared.css">
+  <script src="audio.js"></script>
   <style>
     
     .about-page { 
-       max-width: 900px;
-       margin: 0 auto; 
-       padding: 56px 24px 80px;
-      }
+      max-width: 900px; 
+      margin: 0 auto; 
+      padding: 56px 24px 80px; 
+    }
 
     
     .about-hero {
@@ -40,37 +41,40 @@
     .about-hero-content { 
       position: relative; 
       z-index: 2; 
-      padding: 36px 40px;
-     }
+      padding: 36px 40px; 
+    }
     .about-eyebrow { 
-      font-size: 11px;
+      font-size: 11px; 
       text-transform: uppercase;
       letter-spacing: 1.5px; 
-      color: var(--gold);
+      color: var(--gold); 
       font-weight: 500; 
       margin-bottom: 10px; 
-      }
+    }
     .about-hero-title { 
-     font-family: "Playfair Display",serif;
-     font-size: 38px; font-weight: 600; color: #fff; 
-     line-height: 1.15;
-     letter-spacing: -0.5px; 
-     text-shadow: 0 2px 10px rgba(0,0,0,0.4); 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 38px; 
+      font-weight: 700; 
+      color: #fff; 
+      line-height: 1.15; 
+      letter-spacing: -0.5px; 
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4); 
     }
     .about-hero-sub { 
       font-size: 15px; 
-      color: rgba(255,255,255,0.75); 
+      color: rgba(255,255,255,0.75);
       margin-top: 10px; 
-      line-height: 1.6; 
+      line-height: 1.6;
       max-width: 460px; 
     }
 
     
     .section-heading { 
-      font-family: "Playfair Display",serif; 
-      font-size: 22px; font-weight: 500; 
-      color: var(--text-dark); 
-      margin-bottom: 8px; 
+     font-family: "DM Sans",sans-serif; 
+     font-size: 22px; 
+     font-weight: 700; 
+     color: var(--text-dark); 
+     margin-bottom: 8px; 
     }
     .section-sub { 
       font-size: 14px; 
@@ -86,7 +90,6 @@
       gap: 16px; 
       margin-bottom: 56px; 
     }
-
     .team-card {
       background: var(--white); 
       border: 1px solid var(--stone-light);
@@ -112,42 +115,41 @@
       display: flex; 
       align-items: center; 
       justify-content: center;
-      font-family: "Playfair Display",serif; 
+      font-family: "DM Sans",sans-serif; 
       font-size: 24px; 
-      font-weight: 600; 
+      font-weight: 700; 
       color: #fff;
     }
     .team-name { 
       font-size: 14px; 
       font-weight: 500; 
-      color: var(--text-dark); 
+      color: var(--text-dark);
       margin-bottom: 4px; 
     }
-    .team-role {
-      font-size: 11px; 
+    .team-role { font-size: 11px; 
       color: var(--sage-deep); 
-      font-weight: 500;
+      font-weight: 500; 
       text-transform: uppercase; 
       letter-spacing: 0.6px; 
       margin-bottom: 10px; 
     }
     .team-desc { 
       font-size: 12.5px; 
-      color: var(--text-light);
+      color: var(--text-light); 
       line-height: 1.55; 
     }
 
     
     .two-col { 
-      display: grid;
+      display: grid; 
       grid-template-columns: 1fr 1fr; 
-      gap: 18px;
+      gap: 18px; 
       margin-bottom: 40px; 
     }
-    .info-card { 
-      background: var(--white); 
+    .info-card { background: var(--white); 
       border: 1px solid var(--stone-light); 
-      border-radius: var(--r-md); padding: 24px; 
+      border-radius: var(--r-md); 
+      padding: 24px; 
       box-shadow: var(--shadow-sm); 
     }
     .info-card-icon { 
@@ -155,12 +157,12 @@
       margin-bottom: 12px; 
     }
     .info-card-title { 
-    font-family: "Playfair Display",serif; 
-    font-size: 16px; 
-    font-weight: 500; 
+    font-family: "DM Sans",sans-serif; 
+    font-size: 16px;
+    font-weight: 700; 
     color: var(--text-dark); 
-    margin-bottom: 8px; 
-  }
+    margin-bottom: 8px;
+   }
     .info-card-text { 
       font-size: 13px; 
       color: var(--text-light); 
@@ -168,15 +170,16 @@
     }
 
     
-    .tech-table {
+    .tech-table { 
       width: 100%; 
       border-collapse: collapse; 
       margin-bottom: 56px; 
       font-size: 13px; 
     }
-    .tech-table th {
+    .tech-table th { 
       text-align: left; 
-      font-size: 11px; font-weight: 500; 
+      font-size: 11px; 
+      font-weight: 500; 
       color: var(--text-light); 
       letter-spacing: 0.5px; 
       text-transform: uppercase; 
@@ -187,12 +190,13 @@
     .tech-table td { 
       padding: 12px 16px; 
       border-bottom: 1px solid var(--cream-dark); 
-      color: var(--text-mid); vertical-align: top; 
+      color: var(--text-mid); 
+      vertical-align: top; 
     }
     .tech-table tr:last-child td { 
       border-bottom: none; 
     }
-    .tech-table tr:hover td { 
+    .tech-table tr:hover td {
       background: var(--sage-light); 
     }
     .tech-name { 
@@ -200,22 +204,27 @@
       color: var(--text-dark); 
     }
     .tech-wrap { 
-      background: var(--white);
-      border: 1px solid var(--stone-light);
-      border-radius: var(--r-md); overflow: hidden; 
-      box-shadow: var(--shadow-sm); margin-bottom: 56px; 
+      background: var(--white); 
+      border: 1px solid var(--stone-light); 
+      border-radius: var(--r-md); 
+      overflow: hidden; 
+      box-shadow: var(--shadow-sm); 
+      margin-bottom: 56px; 
     }
 
     
     .about-cta { 
       background: var(--sage-deep); 
-      border-radius: var(--r-lg); padding: 48px; 
-      text-align: center; color: #fff; 
+      border-radius: var(--r-lg); 
+      padding: 48px; 
+      text-align: center; 
+      color: #fff; 
     }
     .about-cta-title { 
-    font-family: "Playfair Display",serif; 
-    font-size: 28px;
-    margin-bottom: 10px; 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 28px; 
+      font-weight: 700; 
+      margin-bottom: 10px; 
     }
     .about-cta-sub { 
       font-size: 14px; 
@@ -223,14 +232,17 @@
       margin-bottom: 24px; 
       line-height: 1.6; 
     }
-
     .btn-cream { 
       display: inline-block; 
       padding: 13px 28px; 
-      background: var(--cream); color: var(--sage-deep); 
-      border: none; border-radius: var(--r-sm); 
-      font-family: "DM Sans",sans-serif; font-size: 14px; 
-      font-weight: 500; text-decoration: none; 
+      background: var(--cream); 
+      color: var(--sage-deep); 
+      border: none; 
+      border-radius: var(--r-sm); 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 14px; 
+      font-weight: 500; 
+      text-decoration: none; 
       cursor: pointer; 
       transition: background 0.2s; 
     }
