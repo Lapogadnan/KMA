@@ -1,4 +1,3 @@
-
 export const firebaseConfig = {
   apiKey: "AIzaSyCs2JS-QSFgrrn8kw2HBST7M04MEm2rdd0",
   authDomain: "kma-5961b.firebaseapp.com",
@@ -9,3 +8,10 @@ export const firebaseConfig = {
   measurementId: "G-GVP27C3KMG"
 };
 
+/**
+ * Test account (for assessment — see project spec):
+ *   Email:    bob@mail.com
+ *   Password: bobpass
+ *
+ * Create this account once in the Firebase Console under Authentication.
+ */
