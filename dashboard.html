@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kill My Assignments — Dashboard</title>
   <link rel="stylesheet" href="shared.css">
+  <script src="face-utils.js"></script>
+  <script src="audio.js"></script>
   <style>
     .dashboard-layout {
       display: grid;
-      grid-template-columns: 240px 1fr 280px; 
+      grid-template-columns: 240px 1fr 280px;
       min-height: calc(100vh - 47px);
     }
 
@@ -55,24 +57,44 @@
     }
 
     .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 20px; font-size: 13px; color: var(--text-mid);
-      cursor: pointer; text-decoration: none;
-      transition: all 0.15s; border-left: 2.5px solid transparent;
+      display: flex; align-items: 
+      center; gap: 12px;
+      margin: 0 14px 8px;
+      padding: 10px 14px; 
+      font-size: 13px; 
+      color: var(--text-dark);
+      cursor: pointer; 
+      text-decoration: none;
+      transition: filter 0.12s, transform 0.12s;
+      border-top: 2px solid transparent;
+      border-left: 2px solid transparent;
+      border-bottom: 2px solid transparent;
+      border-right: 2px solid transparent;
+      background: #ece8df;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.12);
     }
+
     .nav-item:hover { 
-      background: var(--sage-light); 
-      color: var(--text-dark); 
+      background: #f2efe8;
+      filter: brightness(1.03);
+      border-top-color: #fff;
+      border-left-color: #fff;
+      border-bottom-color: #a59c90;
+      border-right-color: #a59c90;
     }
     .nav-item.active { 
-      background: var(--sage-light); 
-      color: var(--sage-deep); 
-      border-left-color: var(--sage-deep); 
-      font-weight: 500; 
+      background: var(--sage-deep);
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+      border-top-color: var(--mc-green-hi);
+      border-left-color: var(--mc-green-hi);
+      border-bottom-color: var(--mc-green-sh);
+      border-right-color: var(--mc-green-sh);
     }
     .nav-icon { 
       font-size: 15px; 
-      opacity: 0.8; 
+      opacity: 0.95; 
     }
     .nav-section-label { 
       font-size: 10px; 
@@ -106,8 +128,9 @@
     }
 
     .page-title { 
-      font-family: "Playfair Display",serif; font-size: 24px; 
-      font-weight: 500; 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 25px;
+      font-weight: 700; 
       color: var(--text-dark); 
       margin-bottom: 4px; 
     }
@@ -125,9 +148,12 @@
     }
     .stat-card { 
       background: var(--white); 
-      border-radius: var(--r-md); 
+      border-radius: 0; 
       padding: 18px 20px; 
-      border: 1px solid var(--stone-light); 
+      border-top: 2px solid #f8f5ef;
+      border-left: 2px solid #f8f5ef;
+      border-bottom: 2px solid #afa79a;
+      border-right: 2px solid #afa79a;
       box-shadow: var(--shadow-sm); 
     }
     .stat-label { 
@@ -139,9 +165,9 @@
       margin-bottom: 8px; 
     }
     .stat-value { 
-      font-family: "Playfair Display",serif; 
-      font-size: 26px; 
-      font-weight: 500; 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 24px; 
+      font-weight: 700; 
       color: var(--text-dark); 
     }
     .stat-sub { 
@@ -232,22 +258,28 @@
       border-bottom: none; 
     }
     .activity-dot { 
-      width: 8px; height: 8px; 
+      width: 8px; 
+      height: 8px; 
       border-radius: 50%; 
       background: #c8d8c8; 
       margin-top: 5px; 
       flex-shrink: 0; 
     }
+
     .activity-dot.hot { 
       background: var(--gold); 
     }
+
     .activity-dot.new { 
       background: var(--sage); 
     }
+
     .activity-text { 
-      font-size: 12.5px; color: var(--text-mid); 
+      font-size: 12.5px; 
+      color: var(--text-mid); 
       line-height: 1.5; 
     }
+
     .activity-time { 
       font-size: 11px; 
       color: var(--text-light); 
@@ -259,6 +291,7 @@
       border-left: 1px solid var(--stone-light); 
       padding: 28px 22px; 
     }
+
     .friend-card { 
       display: flex; 
       align-items: center; 
@@ -266,69 +299,109 @@
       padding: 10px 0; 
       border-bottom: 1px solid var(--cream-dark); 
     }
+
     .friend-card:last-of-type { 
       border-bottom: none; 
     }
+
     .friend-avatar { 
       width: 34px; 
       height: 34px; 
       font-size: 12px; 
     }
+
     .friend-name { 
       font-size: 13px; 
       font-weight: 500; 
       color: var(--text-dark); 
     }
+
     .friend-status { 
       font-size: 11px; 
       color: var(--text-light); 
     }
+
     .online-dot { 
       display: inline-block; 
       width: 6px; height: 6px; 
       border-radius: 50%; background: #68C76A; 
       margin-right: 4px; 
     }
+
     .encourage-btn { 
       margin-left: auto; 
-      padding: 5px 10px; 
-      background: var(--sage-light); 
-      border: none; border-radius: 6px; 
-      font-size: 11px; color: var(--sage-deep); 
+      padding: 5px 10px;
+      background: #6e6e6e;
+      border: none;
+      border-top: 2px solid var(--mc-stone-hi);
+      border-left: 2px solid var(--mc-stone-hi);
+      border-bottom: 2px solid var(--mc-stone-sh);
+      border-right: 2px solid var(--mc-stone-sh);
+      border-radius: 0;
+      font-size: 11px; 
+      color: #fff; 
       cursor: pointer; 
-      transition: background 0.15s; 
+      transition: filter 0.12s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
     }
+
     .encourage-btn:hover { 
-      background: #c8d8c8; 
+      filter: brightness(1.12);
     }
 
     .quick-start { 
       margin-top: 24px; 
-      background: linear-gradient(135deg,var(--sage-deep),var(--moss)); 
-      border-radius: var(--r-md); 
-      padding: 20px; color: #fff; 
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.10)),
+        linear-gradient(135deg, #4e7a4b, #2f4c30);
+      border-radius: 0;
+      padding: 20px; 
+      color: #fff;
+      border-top: 3px solid #84b27c;
+      border-left: 3px solid #84b27c;
+      border-bottom: 3px solid #142517;
+      border-right: 3px solid #142517;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
     }
+
     .qs-title { 
-      font-family: "Playfair Display",serif; 
-      font-size: 16px; 
+      font-family: "DM Sans",sans-serif;
+      font-size: 18px;
+      font-weight: 700;
       margin-bottom: 6px; 
     }
+
     .qs-sub { 
       font-size: 12px; 
       opacity: 0.75; 
       margin-bottom: 16px; 
       line-height: 1.5; 
     }
+
     .btn-white {
       width: 100%; padding: 10px;
-      background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: var(--r-sm); color: #fff; font-size: 13px;
-      font-family: "DM Sans",sans-serif; cursor: pointer;
-      transition: background 0.2s; text-align: center; display: block; text-decoration: none;
+      background: #d9d5ca;
+      border: none;
+      border-top: 3px solid #f5f2eb;
+      border-left: 3px solid #f5f2eb;
+      border-bottom: 3px solid #8a8175;
+      border-right: 3px solid #8a8175;
+      border-radius: 0; color: #243024; 
+      font-size: 13px;
+      font-family: "DM Sans",sans-serif; 
+      cursor: pointer;
+      transition: filter 0.12s; 
+      text-align: center; 
+      display: block; 
+      text-decoration: none;
+      font-weight: 700;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
     }
+
     .btn-white:hover { 
-      background: rgba(255,255,255,0.3); 
+      filter: brightness(1.06);
     }
+
   </style>
 </head>
 <body>
@@ -344,7 +417,7 @@
     </div>
     <div class="nav-right">
       <div class="nav-user-pill">
-        <div class="nav-user-dot" id="nav-initial">?</div>
+        <img class="nav-user-dot" id="nav-face" src="" alt="Avatar" style="width:28px;height:28px;object-fit:cover;image-rendering:pixelated;border-radius:2px;">
         <span id="nav-display-name">Account</span>
       </div>
     </div>
@@ -352,7 +425,7 @@
   <div class="dashboard-layout">
     <div class="sidebar">
       <div class="sidebar-user">
-        <div class="avatar sidebar-avatar" id="sidebar-initial">?</div>
+        <img class="avatar sidebar-avatar mc-avatar" id="sidebar-face" src="" alt="Avatar" width="40" height="40">
         <div class="sidebar-name" id="sidebar-name">Loading...</div>
         <div class="sidebar-role">Year 1</div>
         <div class="sidebar-streak" id="streak-display"><div class="streak-dot"></div> <span id="streak-count">—</span>-day streak</div>
@@ -480,9 +553,13 @@
 
       document.getElementById("greeting").textContent         = `${greet}, ${name.split(" ")[0]}`;
       document.getElementById("nav-display-name").textContent = name.split(" ")[0];
-      document.getElementById("nav-initial").textContent      = initial;
-      document.getElementById("sidebar-initial").textContent  = initial;
       document.getElementById("sidebar-name").textContent     = name;
+      // Set Minecraft face avatars
+      const face = window.getFace ? window.getFace(user.uid) : '';
+      const navFaceEl = document.getElementById("nav-face");
+      if (navFaceEl) navFaceEl.src = face;
+      const sidebarFaceEl = document.getElementById("sidebar-face");
+      if (sidebarFaceEl) sidebarFaceEl.src = face;
       const userRef  = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef).catch(() => null);
       const userData = userSnap?.exists() ? userSnap.data() : {};
@@ -501,7 +578,7 @@
       buildSubjectList(subjectsMap);
 
       try {
-        const today     = new Date(); today.setHours(0, 0, 0, 0);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
         const weekStart = new Date(today);
         weekStart.setDate(weekStart.getDate() - 6);
 
@@ -518,12 +595,12 @@
         const sessions = [];
 
         sessSnap.forEach(d => {
-          const s    = d.data();
+          const s = d.data();
           const date = s.completedAt?.toDate?.() || null;
           const mins = s.durationMins || 0;
 
           if (date) {
-            if (date >= today)     todayMins += mins;
+            if (date >= today) todayMins += mins;
             if (date >= weekStart) {
               weekMins += mins;
               dayMins[date.getDay()] += mins;
@@ -531,17 +608,17 @@
           }
 
           sessions.push({
-            subject:     s.subject || "General",
+            subject:s.subject || "General",
             durationMins: mins,
-            score:       s.score || 0,
+            score:s.score || 0,
             completedAt: date,
           });
         });
 
-        document.getElementById("stat-today").textContent     = fmtMins(todayMins);
+        document.getElementById("stat-today").textContent= fmtMins(todayMins);
         document.getElementById("stat-today-sub").textContent = "Studied today";
-        document.getElementById("stat-week").textContent      = fmtMins(weekMins);
-        document.getElementById("stat-week-sub").textContent  = "Past 7 days";
+        document.getElementById("stat-week").textContent= fmtMins(weekMins);
+        document.getElementById("stat-week-sub").textContent= "Past 7 days";
 
         buildBarChart(dayMins);
         buildActivityFeed(sessions);
@@ -579,13 +656,12 @@
         }
 
         list.innerHTML = others.map(u => {
-          const dName  = u.displayName || "Anonymous";
-          const dInit  = dName.charAt(0).toUpperCase();
-          const bg     = avatarBg(dName);
+          const dName= u.displayName || "Anonymous";
           const status = u.subject ? `Studying ${u.subject}` : "Studying now";
+          const face= window.getFace ? window.getFace(u.uid || dName) : '';
           return `
             <div class="friend-card">
-              <div class="avatar friend-avatar" style="background:${bg}">${dInit}</div>
+              <img class="mc-avatar friend-avatar" src="${face}" width="34" height="34" alt="${dName}" style="border-radius:2px;object-fit:cover;image-rendering:pixelated;flex-shrink:0;">
               <div>
                 <div class="friend-name">${dName}</div>
                 <div class="friend-status"><span class="online-dot"></span>${status}</div>
@@ -602,13 +678,13 @@
 
 
     function buildBarChart(dayMins) {
-      const labels  = ["S", "M", "T", "W", "T", "F", "S"];
-      const todayI  = new Date().getDay();
-      const maxH    = 72;
+      const labels= ["S", "M", "T", "W", "T", "F", "S"];
+      const todayI= new Date().getDay();
+      const maxH = 72;
       const maxMins = Math.max(...dayMins, 1);
 
       const html = dayMins.map((mins, i) => {
-        const h   = Math.max(Math.round((mins / maxMins) * maxH), 2);
+        const h = Math.max(Math.round((mins / maxMins) * maxH), 2);
         const cls = i === todayI ? "bar today" : "bar";
         const tip = mins > 0 ? `title="${fmtMins(mins)}"` : "";
         return `<div class="bar-col"><div class="${cls}" style="height:${h}px" ${tip}></div><div class="bar-label">${labels[i]}</div></div>`;
@@ -619,7 +695,7 @@
 
 
     function buildSubjectList(map) {
-      const el      = document.getElementById("subject-list");
+      const el = document.getElementById("subject-list");
       const entries = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
       if (!entries.length) {
@@ -628,10 +704,10 @@
         return;
       }
 
-      const total  = entries.reduce((s, [, m]) => s + m, 0) || 1;
-      const colors = ["var(--sage-deep)", "var(--sage)", "#7AABB8", "#B89E4A", "#9B8BC4"];
+      const total= entries.reduce((s, [, m]) => s + m, 0) || 1;
+      const colors= ["var(--sage-deep)", "var(--sage)", "#7AABB8", "#B89E4A", "#9B8BC4"];
 
-      el.innerHTML = entries.map(([subject, mins], i) => {
+      el.innerHTML= entries.map(([subject, mins], i) => {
         const pct = Math.round((mins / total) * 100);
         return `
           <div class="subject-row">
