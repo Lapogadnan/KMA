@@ -4,123 +4,407 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kill My Assignments — Dashboard</title>
-  <!--
-    dashboard.html — Personal stats hub (LOGIN REQUIRED)
-    ──────────────────────────────────────────────────────────────
-    Auth guard: onAuthStateChanged redirects to login.html if not signed in.
-    Once authenticated, user's display name populates the nav pill,
-    sidebar avatar, and greeting.
-
-    Data shown is currently static/demo. Wire to Firestore to make it live:
-      • activeSessions/{uid}          — current session
-      • users/{uid}/sessions          — history for charts
-      • users/{uid}.weeklyScore       — leaderboard score
-      • users/{uid}.streak            — day streak
-    ──────────────────────────────────────────────────────────────
-  -->
   <link rel="stylesheet" href="shared.css">
+  <script src="face-utils.js"></script>
+  <script src="audio.js"></script>
   <style>
-    /* Three-column layout: sidebar | main | right panel */
     .dashboard-layout {
       display: grid;
       grid-template-columns: 240px 1fr 280px;
       min-height: calc(100vh - 47px);
     }
 
-    /* ── Left sidebar ── */
-    .sidebar { background: var(--white); border-right: 1px solid var(--stone-light); padding: 28px 0; }
-    .sidebar-user { padding: 0 20px 24px; border-bottom: 1px solid var(--stone-light); margin-bottom: 16px; }
-    .sidebar-avatar { width: 40px; height: 40px; background: linear-gradient(135deg,var(--sage),var(--moss)); font-size: 15px; margin-bottom: 10px; }
-    .sidebar-name { font-size: 14px; font-weight: 500; color: var(--text-dark); }
-    .sidebar-role { font-size: 11px; color: var(--text-light); margin-top: 1px; }
-    .sidebar-streak { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 11px; color: var(--gold); font-weight: 500; }
-    .streak-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; }
+    .sidebar { 
+      background: var(--white); 
+      border-right: 1px solid var(--stone-light); 
+      padding: 28px 0; 
+    }
+    .sidebar-user { 
+      padding: 0 20px 24px; 
+      border-bottom: 1px solid var(--stone-light); 
+      margin-bottom: 16px; 
+    }
+    .sidebar-avatar { 
+      width: 40px; 
+      height: 40px; 
+      background: linear-gradient(135deg,var(--sage),var(--moss)); 
+      font-size: 15px; margin-bottom: 10px; 
+    }
+    .sidebar-name { 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: var(--text-dark); 
+    }
+    .sidebar-role { 
+      font-size: 11px; 
+      color: var(--text-light); 
+      margin-top: 1px; 
+    }
+    .sidebar-streak { 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      margin-top: 10px; 
+      font-size: 11px; 
+      color: var(--gold); 
+      font-weight: 500; 
+    }
+    .streak-dot { 
+      width: 6px; 
+      height: 6px; 
+      background: var(--gold); 
+      border-radius: 50%; 
+    }
 
     .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 20px; font-size: 13px; color: var(--text-mid);
-      cursor: pointer; text-decoration: none;
-      transition: all 0.15s; border-left: 2.5px solid transparent;
+      display: flex; align-items: 
+      center; gap: 12px;
+      margin: 0 14px 8px;
+      padding: 10px 14px; 
+      font-size: 13px; 
+      color: var(--text-dark);
+      cursor: pointer; 
+      text-decoration: none;
+      transition: filter 0.12s, transform 0.12s;
+      border-top: 2px solid transparent;
+      border-left: 2px solid transparent;
+      border-bottom: 2px solid transparent;
+      border-right: 2px solid transparent;
+      background: #ece8df;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.12);
     }
-    .nav-item:hover { background: var(--sage-light); color: var(--text-dark); }
-    .nav-item.active { background: var(--sage-light); color: var(--sage-deep); border-left-color: var(--sage-deep); font-weight: 500; }
-    .nav-icon { font-size: 15px; opacity: 0.8; }
-    .nav-section-label { font-size: 10px; color: var(--text-light); letter-spacing: 1px; text-transform: uppercase; padding: 16px 20px 6px; font-weight: 500; }
 
-    /* ── Main content area ── */
-    .main-content { background: #F0EDE4; padding: 32px 36px; position: relative; overflow: hidden; }
-    .main-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0.40; pointer-events: none; }
-    /* All main content sits above the background image */
-    .main-inner { position: relative; z-index: 1; }
+    .nav-item:hover { 
+      background: #f2efe8;
+      filter: brightness(1.03);
+      border-top-color: #fff;
+      border-left-color: #fff;
+      border-bottom-color: #a59c90;
+      border-right-color: #a59c90;
+    }
+    .nav-item.active { 
+      background: var(--sage-deep);
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+      border-top-color: var(--mc-green-hi);
+      border-left-color: var(--mc-green-hi);
+      border-bottom-color: var(--mc-green-sh);
+      border-right-color: var(--mc-green-sh);
+    }
+    .nav-icon { 
+      font-size: 15px; 
+      opacity: 0.95; 
+    }
+    .nav-section-label { 
+      font-size: 10px; 
+      color: var(--text-light); 
+      letter-spacing: 1px; 
+      text-transform: uppercase; 
+      padding: 16px 20px 6px; 
+      font-weight: 500; 
+    }
 
-    .page-title { font-family: "Playfair Display",serif; font-size: 24px; font-weight: 500; color: var(--text-dark); margin-bottom: 4px; }
-    .page-sub { font-size: 13px; color: var(--text-light); margin-bottom: 28px; }
+    .main-content { 
+      background: #F0EDE4; 
+      padding: 32px 36px; 
+      position: relative; 
+      overflow: hidden; 
+    }
+    .main-bg { 
+      position: absolute; 
+      inset: 0; 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+      object-position: center; 
+      opacity: 0.40; 
+      pointer-events: none; 
+    }
+    
+    .main-inner { 
+      position: relative; 
+      z-index: 1; 
+    }
 
-    /* Stats row */
-    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
-    .stat-card { background: var(--white); border-radius: var(--r-md); padding: 18px 20px; border: 1px solid var(--stone-light); box-shadow: var(--shadow-sm); }
-    .stat-label { font-size: 11px; color: var(--text-light); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
-    .stat-value { font-family: "Playfair Display",serif; font-size: 26px; font-weight: 500; color: var(--text-dark); }
-    .stat-sub { font-size: 11px; color: var(--sage); margin-top: 4px; }
+    .page-title { 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 25px;
+      font-weight: 700; 
+      color: var(--text-dark); 
+      margin-bottom: 4px; 
+    }
+    .page-sub { 
+      font-size: 13px; 
+      color: var(--text-light); 
+      margin-bottom: 28px; 
+    }
 
-    /* Two-column cards row */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .stats-row { 
+      display: grid; 
+      grid-template-columns: repeat(4,1fr); 
+      gap: 14px; 
+      margin-bottom: 24px; 
+    }
+    .stat-card { 
+      background: var(--white); 
+      border-radius: 0; 
+      padding: 18px 20px; 
+      border-top: 2px solid #f8f5ef;
+      border-left: 2px solid #f8f5ef;
+      border-bottom: 2px solid #afa79a;
+      border-right: 2px solid #afa79a;
+      box-shadow: var(--shadow-sm); 
+    }
+    .stat-label { 
+      font-size: 11px; 
+      color: var(--text-light); 
+      font-weight: 500; 
+      letter-spacing: 0.5px; 
+      text-transform: uppercase; 
+      margin-bottom: 8px; 
+    }
+    .stat-value { 
+      font-family: "DM Sans",sans-serif; 
+      font-size: 24px; 
+      font-weight: 700; 
+      color: var(--text-dark); 
+    }
+    .stat-sub { 
+      font-size: 11px; 
+      color: var(--sage); 
+      margin-top: 4px; 
+    }
 
-    /* Bar chart */
-    .bar-chart { display: flex; gap: 10px; align-items: flex-end; height: 80px; }
-    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .bar { width: 100%; border-radius: 4px 4px 0 0; background: #c8d8c8; }
-    .bar.today { background: var(--sage-deep); }
-    .bar-label { font-size: 10px; color: var(--text-light); }
+    .two-col { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 18px; 
+      margin-bottom: 18px; 
+    }
 
-    /* Subject breakdown */
-    .subject-list { display: flex; flex-direction: column; gap: 10px; }
-    .subject-row { display: flex; align-items: center; gap: 10px; }
-    .subject-name { font-size: 13px; color: var(--text-mid); min-width: 90px; }
-    .subject-bar-wrap { flex: 1; height: 7px; background: var(--cream-dark); border-radius: 99px; overflow: hidden; }
-    .subject-bar-fill { height: 100%; border-radius: 99px; background: var(--sage); }
-    .subject-pct { font-size: 11px; color: var(--text-light); min-width: 30px; text-align: right; }
+    .bar-chart { 
+      display: flex; 
+      gap: 10px; 
+      align-items: flex-end; 
+      height: 80px; 
+    }
+    .bar-col { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 6px; 
+    }
+    .bar { 
+      width: 100%; 
+      border-radius: 4px 4px 0 0; 
+      background: #c8d8c8; 
+    }
+    .bar.today { 
+      background: var(--sage-deep); 
+    }
+    .bar-label { 
+      font-size: 10px; 
+      color: var(--text-light); 
+    }
 
-    /* Activity feed */
-    .activity-feed { display: flex; flex-direction: column; }
-    .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-dot { width: 8px; height: 8px; border-radius: 50%; background: #c8d8c8; margin-top: 5px; flex-shrink: 0; }
-    .activity-dot.hot { background: var(--gold); }
-    .activity-dot.new { background: var(--sage); }
-    .activity-text { font-size: 12.5px; color: var(--text-mid); line-height: 1.5; }
-    .activity-time { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+    .subject-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+    }
+    .subject-row { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    .subject-name { 
+      font-size: 13px; 
+      color: var(--text-mid); 
+      min-width: 90px; 
+    }
+    .subject-bar-wrap { 
+      flex: 1; 
+      height: 7px; 
+      background: var(--cream-dark); 
+      border-radius: 99px; 
+      overflow: hidden; 
+    }
+    .subject-bar-fill { 
+      height: 100%; 
+      border-radius: 99px; 
+      background: var(--sage); 
+    }
+    .subject-pct { 
+      font-size: 11px; 
+      color: var(--text-light); 
+      min-width: 30px; 
+      text-align: right; 
+    }
 
-    /* ── Right panel ── */
-    .right-panel { background: var(--white); border-left: 1px solid var(--stone-light); padding: 28px 22px; }
-    .friend-card { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
-    .friend-card:last-of-type { border-bottom: none; }
-    .friend-avatar { width: 34px; height: 34px; font-size: 12px; }
-    .friend-name { font-size: 13px; font-weight: 500; color: var(--text-dark); }
-    .friend-status { font-size: 11px; color: var(--text-light); }
-    .online-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #68C76A; margin-right: 4px; }
-    .encourage-btn { margin-left: auto; padding: 5px 10px; background: var(--sage-light); border: none; border-radius: 6px; font-size: 11px; color: var(--sage-deep); cursor: pointer; transition: background 0.15s; }
-    .encourage-btn:hover { background: #c8d8c8; }
+    .activity-feed { 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .activity-item { 
+      display: flex; 
+      align-items: flex-start; 
+      gap: 12px; 
+      padding: 10px 0; 
+      border-bottom: 1px solid var(--cream-dark); 
+    }
+    .activity-item:last-child { 
+      border-bottom: none; 
+    }
+    .activity-dot { 
+      width: 8px; 
+      height: 8px; 
+      border-radius: 50%; 
+      background: #c8d8c8; 
+      margin-top: 5px; 
+      flex-shrink: 0; 
+    }
 
-    /* Quick-start card */
-    .quick-start { margin-top: 24px; background: linear-gradient(135deg,var(--sage-deep),var(--moss)); border-radius: var(--r-md); padding: 20px; color: #fff; }
-    .qs-title { font-family: "Playfair Display",serif; font-size: 16px; margin-bottom: 6px; }
-    .qs-sub { font-size: 12px; opacity: 0.75; margin-bottom: 16px; line-height: 1.5; }
+    .activity-dot.hot { 
+      background: var(--gold); 
+    }
+
+    .activity-dot.new { 
+      background: var(--sage); 
+    }
+
+    .activity-text { 
+      font-size: 12.5px; 
+      color: var(--text-mid); 
+      line-height: 1.5; 
+    }
+
+    .activity-time { 
+      font-size: 11px; 
+      color: var(--text-light); 
+      margin-top: 2px; 
+    }
+
+    .right-panel { 
+      background: var(--white); 
+      border-left: 1px solid var(--stone-light); 
+      padding: 28px 22px; 
+    }
+
+    .friend-card { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      padding: 10px 0; 
+      border-bottom: 1px solid var(--cream-dark); 
+    }
+
+    .friend-card:last-of-type { 
+      border-bottom: none; 
+    }
+
+    .friend-avatar { 
+      width: 34px; 
+      height: 34px; 
+      font-size: 12px; 
+    }
+
+    .friend-name { 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: var(--text-dark); 
+    }
+
+    .friend-status { 
+      font-size: 11px; 
+      color: var(--text-light); 
+    }
+
+    .online-dot { 
+      display: inline-block; 
+      width: 6px; height: 6px; 
+      border-radius: 50%; background: #68C76A; 
+      margin-right: 4px; 
+    }
+
+    .encourage-btn { 
+      margin-left: auto; 
+      padding: 5px 10px;
+      background: #6e6e6e;
+      border: none;
+      border-top: 2px solid var(--mc-stone-hi);
+      border-left: 2px solid var(--mc-stone-hi);
+      border-bottom: 2px solid var(--mc-stone-sh);
+      border-right: 2px solid var(--mc-stone-sh);
+      border-radius: 0;
+      font-size: 11px; 
+      color: #fff; 
+      cursor: pointer; 
+      transition: filter 0.12s;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+
+    .encourage-btn:hover { 
+      filter: brightness(1.12);
+    }
+
+    .quick-start { 
+      margin-top: 24px; 
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.10)),
+        linear-gradient(135deg, #4e7a4b, #2f4c30);
+      border-radius: 0;
+      padding: 20px; 
+      color: #fff;
+      border-top: 3px solid #84b27c;
+      border-left: 3px solid #84b27c;
+      border-bottom: 3px solid #142517;
+      border-right: 3px solid #142517;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+    }
+
+    .qs-title { 
+      font-family: "DM Sans",sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px; 
+    }
+
+    .qs-sub { 
+      font-size: 12px; 
+      opacity: 0.75; 
+      margin-bottom: 16px; 
+      line-height: 1.5; 
+    }
+
     .btn-white {
       width: 100%; padding: 10px;
-      background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.35);
-      border-radius: var(--r-sm); color: #fff; font-size: 13px;
-      font-family: "DM Sans",sans-serif; cursor: pointer;
-      transition: background 0.2s; text-align: center; display: block; text-decoration: none;
+      background: #d9d5ca;
+      border: none;
+      border-top: 3px solid #f5f2eb;
+      border-left: 3px solid #f5f2eb;
+      border-bottom: 3px solid #8a8175;
+      border-right: 3px solid #8a8175;
+      border-radius: 0; color: #243024; 
+      font-size: 13px;
+      font-family: "DM Sans",sans-serif; 
+      cursor: pointer;
+      transition: filter 0.12s; 
+      text-align: center; 
+      display: block; 
+      text-decoration: none;
+      font-weight: 700;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
     }
-    .btn-white:hover { background: rgba(255,255,255,0.3); }
+
+    .btn-white:hover { 
+      filter: brightness(1.06);
+    }
+
   </style>
 </head>
 <body>
-
-  <!-- ══════════════════════════════════════════════════════
-       NAV — user pill populated dynamically from Firebase
-  ══════════════════════════════════════════════════════ -->
   <nav class="nav">
     <div class="nav-left">
       <a class="nav-logo" href="index.html">Kill My <span>Assignments</span></a>
@@ -132,23 +416,16 @@
       </div>
     </div>
     <div class="nav-right">
-      <!-- Populated by auth state below -->
       <div class="nav-user-pill">
-        <div class="nav-user-dot" id="nav-initial">?</div>
+        <img class="nav-user-dot" id="nav-face" src="" alt="Avatar" style="width:28px;height:28px;object-fit:cover;image-rendering:pixelated;border-radius:2px;">
         <span id="nav-display-name">Account</span>
       </div>
     </div>
   </nav>
-
-  <!-- ══════════════════════════════════════════════════════
-       DASHBOARD LAYOUT
-  ══════════════════════════════════════════════════════ -->
   <div class="dashboard-layout">
-
-    <!-- Left sidebar -->
     <div class="sidebar">
       <div class="sidebar-user">
-        <div class="avatar sidebar-avatar" id="sidebar-initial">?</div>
+        <img class="avatar sidebar-avatar mc-avatar" id="sidebar-face" src="" alt="Avatar" width="40" height="40">
         <div class="sidebar-name" id="sidebar-name">Loading...</div>
         <div class="sidebar-role">Year 1</div>
         <div class="sidebar-streak" id="streak-display"><div class="streak-dot"></div> <span id="streak-count">—</span>-day streak</div>
@@ -163,20 +440,13 @@
       <div class="nav-section-label">Account</div>
       <a class="nav-item" href="#" id="signout-btn"><span class="nav-icon">◌</span> Sign out</a>
     </div>
-
-    <!-- Main content (background img + inner content correctly nested) -->
     <div class="main-content">
       <img class="main-bg"
         src="minecraftpond.png"
         alt="">
-
-      <!-- main-inner must be INSIDE main-content so z-index stacks correctly -->
       <div class="main-inner">
         <div class="page-title" id="greeting">Good afternoon</div>
-        <!-- Active count is populated by the Firestore activeSessions listener below -->
         <div class="page-sub" id="active-sub">Loading…</div>
-
-        <!-- Stat cards — all values populated by Firebase script below -->
         <div class="stats-row">
           <div class="stat-card">
             <div class="stat-label">Today</div>
@@ -203,22 +473,12 @@
         <div class="two-col">
           <div class="card">
             <div class="card-title">Sessions this week</div>
-            <!--
-              Bar chart built from users/{uid}/sessions docs.
-              Each bar = total minutes studied on that day of the week.
-              Today's bar is highlighted in sage-deep green.
-            -->
             <div class="bar-chart" id="bar-chart">
               <div style="font-size:13px;color:var(--text-light);width:100%;text-align:center;padding:20px 0;">Loading…</div>
             </div>
           </div>
           <div class="card">
             <div class="card-title">Focus by subject</div>
-            <!--
-              Built from users/{uid}.subjects map: { "Databases": 120, "COMP1602": 75, … }
-              Each completed work cycle on the timer adds minutes to this map.
-              The "Working on" field on the timer sets the subject name.
-            -->
             <div class="subject-list" id="subject-list">
               <div style="font-size:13px;color:var(--text-light);text-align:center;padding:20px 0;">Loading…</div>
             </div>
@@ -227,26 +487,15 @@
 
         <div class="card">
           <div class="card-title">Recent activity</div>
-          <!--
-            Built from users/{uid}/sessions sub-collection, ordered by completedAt desc.
-            Each completed work cycle writes one document here.
-          -->
           <div class="activity-feed" id="activity-feed">
             <div style="font-size:13px;color:var(--text-light);text-align:center;padding:16px 0;">Loading…</div>
           </div>
         </div>
-      </div><!-- /.main-inner -->
-    </div><!-- /.main-content -->
-
-    <!-- Right panel: active students + quick-start -->
+      </div>
+    </div>
     <div class="right-panel">
       <div class="panel-title">Students studying</div>
-      <!--
-        Shows everyone currently in an active session in real time.
-        Populated by onSnapshot on the activeSessions collection below.
-      -->
       <div id="friends-list">
-        <!-- Populated by Firebase script below -->
         <div style="font-size:13px;color:var(--text-light);padding:16px 0;text-align:center;">Loading…</div>
       </div>
       <div class="quick-start">
@@ -255,13 +504,7 @@
         <a class="btn-white" href="index.html">Open Pomodoro timer</a>
       </div>
     </div>
-
-  </div><!-- /.dashboard-layout -->
-
-  <!-- ══════════════════════════════════════════════════════
-       FIREBASE AUTH GUARD + NAV POPULATION
-       Replace firebaseConfig values in firebase-config.js
-  ══════════════════════════════════════════════════════ -->
+  </div>
   <script type="module">
     import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut }
@@ -274,10 +517,6 @@
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
-
-    // ── Helpers ────────────────────────────────────────────────────
-
-    // Deterministic avatar gradient from name initial
     const COLOURS = [
       "linear-gradient(135deg,#7AABB8,#4A6D7A)",
       "linear-gradient(135deg,#8B6F47,#C4A882)",
@@ -287,8 +526,6 @@
       "linear-gradient(135deg,#9B8BC4,#6A5A9E)"
     ];
     const avatarBg = name => COLOURS[name.charCodeAt(0) % COLOURS.length];
-
-    // Format minutes as "1h 30m", "45m", or "0m"
     function fmtMins(mins) {
       const m = Math.round(mins || 0);
       if (m < 1)  return "0m";
@@ -296,8 +533,6 @@
       const h = Math.floor(m / 60), r = m % 60;
       return r > 0 ? `${h}h ${r}m` : `${h}h`;
     }
-
-    // Format a Date as a relative string ("Just now", "3h ago", "Yesterday", …)
     function timeAgo(date) {
       if (!date) return "";
       const diff = Date.now() - date.getTime();
@@ -309,12 +544,8 @@
       if (hrs  < 48)  return "Yesterday";
       return `${Math.floor(hrs / 24)}d ago`;
     }
-
-    // ── Auth guard ─────────────────────────────────────────────────
     onAuthStateChanged(auth, async user => {
       if (!user) { window.location.href = "login.html"; return; }
-
-      // ── Populate identity from auth object ──────────────────────
       const name    = user.displayName || user.email.split("@")[0];
       const initial = name.charAt(0).toUpperCase();
       const hour    = new Date().getHours();
@@ -322,13 +553,13 @@
 
       document.getElementById("greeting").textContent         = `${greet}, ${name.split(" ")[0]}`;
       document.getElementById("nav-display-name").textContent = name.split(" ")[0];
-      document.getElementById("nav-initial").textContent      = initial;
-      document.getElementById("sidebar-initial").textContent  = initial;
       document.getElementById("sidebar-name").textContent     = name;
-
-      // ── Load user summary document ──────────────────────────────
-      // users/{uid} holds aggregated stats so we don't have to scan all sessions
-      // every time. The timer writes to this doc on each completed work cycle.
+      // Set Minecraft face avatars
+      const face = window.getFace ? window.getFace(user.uid) : '';
+      const navFaceEl = document.getElementById("nav-face");
+      if (navFaceEl) navFaceEl.src = face;
+      const sidebarFaceEl = document.getElementById("sidebar-face");
+      if (sidebarFaceEl) sidebarFaceEl.src = face;
       const userRef  = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef).catch(() => null);
       const userData = userSnap?.exists() ? userSnap.data() : {};
@@ -336,26 +567,20 @@
       const weeklyScore   = userData.weeklyScore   || 0;
       const totalSessions = userData.totalSessions || 0;
       const streak        = userData.streak        || 0;
-      const subjectsMap   = userData.subjects      || {}; // { subjectName: totalMinutes }
+      const subjectsMap   = userData.subjects      || {};
 
-      // Populate score + sessions stat cards from summary doc
       document.getElementById("stat-score").textContent      = weeklyScore.toLocaleString() + " pts";
       document.getElementById("stat-score-sub").textContent  = "This week";
       document.getElementById("stat-sessions").textContent   = totalSessions.toLocaleString();
       document.getElementById("stat-sessions-sub").textContent = "All time";
       document.getElementById("streak-count").textContent    = streak;
 
-      // Build subject breakdown from the accumulated subjects map
       buildSubjectList(subjectsMap);
 
-      // ── Load session records for bar chart + today/week + activity ──
-      // Query up to the last 50 sessions, newest first.
-      // We filter client-side for today / this week to avoid needing a
-      // Firestore composite index beyond orderBy("completedAt").
       try {
-        const today     = new Date(); today.setHours(0, 0, 0, 0);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
         const weekStart = new Date(today);
-        weekStart.setDate(weekStart.getDate() - 6); // rolling 7-day window
+        weekStart.setDate(weekStart.getDate() - 6);
 
         const sessSnap = await getDocs(
           query(
@@ -366,16 +591,16 @@
         );
 
         let todayMins = 0, weekMins = 0;
-        const dayMins  = [0, 0, 0, 0, 0, 0, 0]; // index = day of week (0=Sun)
+        const dayMins  = [0, 0, 0, 0, 0, 0, 0];
         const sessions = [];
 
         sessSnap.forEach(d => {
-          const s    = d.data();
+          const s = d.data();
           const date = s.completedAt?.toDate?.() || null;
           const mins = s.durationMins || 0;
 
           if (date) {
-            if (date >= today)     todayMins += mins;
+            if (date >= today) todayMins += mins;
             if (date >= weekStart) {
               weekMins += mins;
               dayMins[date.getDay()] += mins;
@@ -383,25 +608,23 @@
           }
 
           sessions.push({
-            subject:     s.subject || "General",
+            subject:s.subject || "General",
             durationMins: mins,
-            score:       s.score || 0,
+            score:s.score || 0,
             completedAt: date,
           });
         });
 
-        // Populate today + week stat cards
-        document.getElementById("stat-today").textContent     = fmtMins(todayMins);
+        document.getElementById("stat-today").textContent= fmtMins(todayMins);
         document.getElementById("stat-today-sub").textContent = "Studied today";
-        document.getElementById("stat-week").textContent      = fmtMins(weekMins);
-        document.getElementById("stat-week-sub").textContent  = "Past 7 days";
+        document.getElementById("stat-week").textContent= fmtMins(weekMins);
+        document.getElementById("stat-week-sub").textContent= "Past 7 days";
 
         buildBarChart(dayMins);
         buildActivityFeed(sessions);
 
       } catch (err) {
-        // Common cause: the sessions sub-collection doesn't exist yet (no sessions).
-        // Show zeroed stats rather than an error.
+
         console.warn("Session data load failed:", err);
         document.getElementById("stat-today").textContent = "0m";
         document.getElementById("stat-today-sub").textContent = "Studied today";
@@ -411,9 +634,6 @@
         buildActivityFeed([]);
       }
 
-      // ── Live activeSessions listener — friends panel + subtitle ──
-      // onSnapshot fires immediately with current data, then again on any change.
-      // This makes the friends list update in real time without a page refresh.
       onSnapshot(collection(db, "activeSessions"), snap => {
         const others = [];
         snap.forEach(d => {
@@ -436,13 +656,12 @@
         }
 
         list.innerHTML = others.map(u => {
-          const dName  = u.displayName || "Anonymous";
-          const dInit  = dName.charAt(0).toUpperCase();
-          const bg     = avatarBg(dName);
+          const dName= u.displayName || "Anonymous";
           const status = u.subject ? `Studying ${u.subject}` : "Studying now";
+          const face= window.getFace ? window.getFace(u.uid || dName) : '';
           return `
             <div class="friend-card">
-              <div class="avatar friend-avatar" style="background:${bg}">${dInit}</div>
+              <img class="mc-avatar friend-avatar" src="${face}" width="34" height="34" alt="${dName}" style="border-radius:2px;object-fit:cover;image-rendering:pixelated;flex-shrink:0;">
               <div>
                 <div class="friend-name">${dName}</div>
                 <div class="friend-status"><span class="online-dot"></span>${status}</div>
@@ -457,21 +676,15 @@
       });
     });
 
-    // ── Chart / list builders ──────────────────────────────────────
 
-    /**
-     * buildBarChart(dayMins)
-     * dayMins: array[7] of total minutes studied per day of week (0=Sun).
-     * Renders proportional bars with today's bar highlighted green.
-     */
     function buildBarChart(dayMins) {
-      const labels  = ["S", "M", "T", "W", "T", "F", "S"];
-      const todayI  = new Date().getDay();
-      const maxH    = 72; // max bar height in px
-      const maxMins = Math.max(...dayMins, 1); // avoid divide-by-zero
+      const labels= ["S", "M", "T", "W", "T", "F", "S"];
+      const todayI= new Date().getDay();
+      const maxH = 72;
+      const maxMins = Math.max(...dayMins, 1);
 
       const html = dayMins.map((mins, i) => {
-        const h   = Math.max(Math.round((mins / maxMins) * maxH), 2);
+        const h = Math.max(Math.round((mins / maxMins) * maxH), 2);
         const cls = i === todayI ? "bar today" : "bar";
         const tip = mins > 0 ? `title="${fmtMins(mins)}"` : "";
         return `<div class="bar-col"><div class="${cls}" style="height:${h}px" ${tip}></div><div class="bar-label">${labels[i]}</div></div>`;
@@ -480,13 +693,9 @@
       document.getElementById("bar-chart").innerHTML = html;
     }
 
-    /**
-     * buildSubjectList(map)
-     * map: { subjectName: totalMinutes }
-     * Renders up to 5 subjects as proportional progress bars, sorted by time.
-     */
+
     function buildSubjectList(map) {
-      const el      = document.getElementById("subject-list");
+      const el = document.getElementById("subject-list");
       const entries = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
       if (!entries.length) {
@@ -495,10 +704,10 @@
         return;
       }
 
-      const total  = entries.reduce((s, [, m]) => s + m, 0) || 1;
-      const colors = ["var(--sage-deep)", "var(--sage)", "#7AABB8", "#B89E4A", "#9B8BC4"];
+      const total= entries.reduce((s, [, m]) => s + m, 0) || 1;
+      const colors= ["var(--sage-deep)", "var(--sage)", "#7AABB8", "#B89E4A", "#9B8BC4"];
 
-      el.innerHTML = entries.map(([subject, mins], i) => {
+      el.innerHTML= entries.map(([subject, mins], i) => {
         const pct = Math.round((mins / total) * 100);
         return `
           <div class="subject-row">
@@ -511,11 +720,6 @@
       }).join("");
     }
 
-    /**
-     * buildActivityFeed(sessions)
-     * sessions: array of { subject, durationMins, score, completedAt }
-     * Shows the 5 most recent completed work cycles.
-     */
     function buildActivityFeed(sessions) {
       const el = document.getElementById("activity-feed");
 
@@ -538,7 +742,6 @@
       }).join("");
     }
 
-    // ── Sign out ───────────────────────────────────────────────────
     document.getElementById("signout-btn").addEventListener("click", async e => {
       e.preventDefault();
       await signOut(auth);
